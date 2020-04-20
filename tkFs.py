@@ -22,10 +22,14 @@
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
+from subprocess import call
 import logging
+logging.basicConfig()
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.WARNING)
 DEBUG = False
+
+
 
 import os
 import shutil
@@ -48,7 +52,7 @@ def makedirs(inPath, inVerbose=DEBUG, inLogger=LOGGER):
             raise
 
 @tc.verbosed
-def copy(inInPath, inOutPath=None, inOutDir=None, inVerbose=DEBUG, inLogger=LOGGER):
+def copy(inInPath, inOutPath=None, inOutDir=None, inUseRobocopy=True, inVerbose=DEBUG, inLogger=LOGGER):
     """Copy file or directory"""
 
     assert not inOutPath is None or not inOutDir is None, "Output path and output directory cannot both be None !"
@@ -57,22 +61,47 @@ def copy(inInPath, inOutPath=None, inOutDir=None, inVerbose=DEBUG, inLogger=LOGG
         if inOutPath is None:
             inOutPath = os.join(inOutDir, os.path.basename(filePath))
         
-        makedirs(inOutPath)
-        shutil.copy2(inInPath, inOutPath)
+        #makedirs(inOutPath)
+        if inUseRobocopy:
+            inInFolderPath, inInFileName = os.path.split(inInPath)
+            inOutFolderPath, inOutFileName = os.path.split(inOutPath)
 
-    elif os.path.isdir(inInPath):
+            call(["robocopy", inInFolderPath, inOutFolderPath, inInFileName])
+
+            if inInFileName != inOutFileName:
+                notRenamedPath = os.path.join(inOutFolderPath, inInFileName)
+                os.rename(notRenamedPath, inOutPath)
+        else:
+            shutil.copy2(inInPath, inOutPath)
+
+        return inOutPath
+
+    if os.path.isdir(inInPath):
         outDir = inOutPath or inOutDir
         shutil.copytree(inInPath, outDir)
+
+        return outDir
     else:
         raise IOError("copy : File or directory '{0}' does not exists !".format(inInPath))
 
+    return None
+
 @tc.verbosed
-def copyTranslated( inSourcePattern, inDestinationPattern, inFileList=None, inMove=False,
-                inAddVariables=None, inAllowDifferent=None, inUseDifferent=False, inVerbose=DEBUG, inLogger=LOGGER):
+def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, inMove=False, inUseRobocopy=True,
+                    inAddVariables=None, inVariablesTranslator=None, inAllowDifferent=None, inUseDifferent=False, inVerbose=DEBUG, inLogger=LOGGER):
     """Copy ormove file(s) from a hierarchy pattern to another"""
 
+
+    if not isinstance(inSourcePatterns, dict):
+        inSourcePatterns = {"Unknown":inSourcePatterns}
+
+    if not isinstance(inDestinationPatterns, dict):
+        inDestinationPatterns = {"Unknown":inDestinationPatterns}
+
+    results = []
+
     if inFileList is None:
-        inFileList = [f[0] for f in tkcx.collectPath(inSourcePattern)]
+        inFileList = [f[0] for f in tkcx.collectPath(inSourcePattern[0])]
     elif not isinstance(inFileList, (list, tuple)):
         inFileList = (inFileList,)
 
@@ -81,15 +110,36 @@ def copyTranslated( inSourcePattern, inDestinationPattern, inFileList=None, inMo
             LOGGER.debug("File '{}' does not exists, skip...".format(srcFile))
             continue
 
-        destPath = tkcx.translate(  srcFile, inSourcePattern, inDestinationPattern, inAcceptUndefinedResults=True,
-                                    inAddVariables=inAddVariables, inAllowDifferent=inAllowDifferent, inUseDifferent=inUseDifferent)
+        matched = True
 
-        if not destPath is None:
-            if inMove:
-                shutil.move(srcFile, destPath)
-                LOGGER.info("copyTranslated : File '{0}' moved to '{1}'".format(srcFile, destPath))
-            else:
-                copy(srcFile, destPath, inVerbose=inVerbose)
-                LOGGER.info("copyTranslated : File '{0}' copied to '{1}'".format(srcFile, destPath))
+        for fileType, pattern in inSourcePatterns.iteritems():
+            variables = {}
 
+            if tkcx.match(pattern, srcFile, variables):
+                matched = True
 
+                destPath = tkcx.translate(  srcFile, pattern, inDestinationPatterns[fileType], inAcceptUndefinedResults=True,
+                                    inAddVariables=inAddVariables, inVariablesTranslator=inVariablesTranslator, inAllowDifferent=inAllowDifferent, inUseDifferent=inUseDifferent)
+
+                if not destPath is None:
+                    results.append(destPath)
+                    if inMove:
+                        if inUseRobocopy and srcFile[:3] != destPath[:3]:
+                            inInFolderPath, inInFileName = os.path.split(srcFile)
+                            inOutFolderPath, inOutFileName = os.path.split(destPath)
+
+                            call(["robocopy", inInFolderPath, inOutFolderPath, inInFileName])
+                            os.remove(srcFile)
+                        else:
+                            shutil.move(srcFile, destPath)
+                        LOGGER.info("copyTranslated : File '{0}' moved to '{1}'".format(srcFile, destPath))
+                    else:
+                        copy(srcFile, destPath, inUseRobocopy=inUseRobocopy, inVerbose=inVerbose)
+                        LOGGER.info("copyTranslated : File '{0}' copied to '{1}'".format(srcFile, destPath))
+
+                break
+
+        if not matched:
+            LOGGER.warning("File '{}' does not match any patterns !".format(srcFile))
+
+    return results

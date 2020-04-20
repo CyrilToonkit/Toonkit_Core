@@ -24,6 +24,7 @@ __author__ = "Cyril GIBAUD - Toonkit"
 
 import inspect
 import logging
+logging.basicConfig()
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
    ____                _              _       
@@ -79,7 +80,7 @@ def verbosed(func):
 
                     argsList.append(("{0}=\"{1}\"" if isinstance(value, basestring) else "{0}={1}").format(key, value)) 
 
-                all_kwargs[LOGGER_ARGNAME].debug("CALL {0}({1})".format(func.__name__, ",".join(argsList)))
+                all_kwargs[LOGGER_ARGNAME].debug("CALL {0}({1})\r\n".format(func.__name__, ",".join(argsList)))
             else:
                 #Restore logLevel
                 all_kwargs[LOGGER_ARGNAME].setLevel(logging.WARNING)
@@ -102,6 +103,15 @@ def verbosed(func):
  |____/|_|\___|\__|
                    
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+def getReversedDict(inDict):
+
+    reversedDict = {}
+
+    for value, key in inDict.iteritems():
+        if not value in reversedDict:
+            reversedDict[value] = key
+
+    return reversedDict
 
 def getFromDefaults(inDict, inKey, inLastDefault, *args):
     """
