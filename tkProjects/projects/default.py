@@ -1,10 +1,9 @@
-import .tkProject
+from Toonkit_Core.tkProjects.tkProject import tkProject
 
-VARIABLES =
-{
+VARIABLES={
 	"name":"default"
 }
 
-class default(tkProject):
+class demo(tkProject):
 	def __init__(self):
 		self.name=VARIABLES["name"]

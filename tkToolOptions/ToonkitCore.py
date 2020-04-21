@@ -29,7 +29,7 @@ __author__ = "Cyril GIBAUD - Toonkit"
 VERSIONINFO = "1.0"
 
 class ToonkitCore(Tool):
-    def __init__(self, inContext=None, inDebug=False):
+    def __init__(self, inContext=None, inDebug=True):
         print "Toonkit Core {0} initializing...".format(VERSIONINFO)
 
         super(ToonkitCore, self).__init__(inName="ToonkitMayaCore", inDescription="Toonkit's Maya base library",

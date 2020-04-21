@@ -18,6 +18,8 @@
     You should have received a copy of the GNU Lesser General Public License
     along with Toonkit Module Lite.  If not, see <http://www.gnu.org/licenses/>
 -------------------------------------------------------------------------------
+
+    ASCII Text font "Ivrit" (http://patorjk.com/software/taag)
 """
 
 __author__ = "Cyril GIBAUD - Toonkit"
@@ -25,6 +27,10 @@ __author__ = "Cyril GIBAUD - Toonkit"
 import inspect
 import logging
 logging.basicConfig()
+
+import tkProjects.tkProject as tkProject
+
+from tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
    ____                _              _       
@@ -34,6 +40,8 @@ logging.basicConfig()
   \____\___/|_| |_|___/\__\__,_|_| |_|\__|___/
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+TOOL = None
 
 VERBOSE_ARGNAME = "inVerbose"
 LOGGER_ARGNAME = "inLogger"
@@ -137,3 +145,28 @@ def getFromDefaults(inDict, inKey, inLastDefault, *args):
             return defaultDict[inKey]
 
     return inLastDefault
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  _____            _                                      _   
+ | ____|_ ____   _(_)_ __ ___  _ __  _ __ ___   ___ _ __ | |_ 
+ |  _| | '_ \ \ / / | '__/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __|
+ | |___| | | \ V /| | | | (_) | | | | | | | | |  __/ | | | |_ 
+ |_____|_| |_|\_/ |_|_|  \___/|_| |_|_| |_| |_|\___|_| |_|\__|
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def getTool():
+    global TOOL
+    if not TOOL:#Try to get core tool instance from interperter level
+        try:
+            TOOL = eval("tc.TOOL")
+        except:
+            pass
+    
+    if not TOOL:
+        TOOL = ToonkitCore()
+
+    return TOOL
+
+def getProject(inName=None):
+    return tkProject.get(inName or getTool().options["project"])

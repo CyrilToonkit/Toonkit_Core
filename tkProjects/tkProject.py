@@ -22,8 +22,60 @@
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
+import os
+import sys
+
 import tkContext
 
+def _get(inName):
+    mod = None
+    if sys.version_info >= (2,7):
+        import importlib
+        print "importlib"
+        #try:
+        mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+        #except Exception,e:
+        #    print str(e)
+        #    pass
+
+    else:
+        mod = __import__("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+
+    if mod is None:
+        return None 
+
+    toolClass = getattr(mod, inName)
+
+    return toolClass()
+
+def get(inName):
+    project = None
+
+    folder = os.path.dirname(os.path.realpath(__file__))
+    projectsFolder = os.path.join(folder, "projects")
+    
+    subFiles = os.listdir(projectsFolder)
+
+    print "subFiles",subFiles
+
+    if inName + ".py" in subFiles:
+        project = _get(inName)
+
+    if project is None:
+        project = _get("default")
+
+    if project is None and len(subFiles) > 0:
+        for subFile in subFiles:
+            if not subFile.endswith(".py"):
+                continue
+
+                project = _get(subFile[:-3])
+
+                if not project is None:
+                    break
+
+    return project
+
 class tkProject:
-	def __init__(self, inName):
-		self.name=inName
+	def __init__(self):
+		self.name=None

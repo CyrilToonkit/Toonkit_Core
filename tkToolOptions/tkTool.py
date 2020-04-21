@@ -21,9 +21,7 @@
 """
 import os
 import sys
-from functools import partial
 
-from functools import partial
 from tkOptions import Options 
 
 __author__ = "Cyril GIBAUD - Toonkit"
@@ -122,7 +120,7 @@ class Tool(object):
     def getOptionsPath(self):
         folderPath = os.path.dirname(os.path.realpath(__file__))
 
-        return os.path.abspath(os.path.join(folderPath, os.pardir, "Preferences", "{0}.json".format(type(self).__name__)))
+        return os.path.abspath(os.path.join(folderPath, os.pardir, "CorePreferences", "{0}.json".format(type(self).__name__)))
 
     def saveOptions(self):
         if self.options.path is None:
