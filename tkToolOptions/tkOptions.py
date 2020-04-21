@@ -20,10 +20,11 @@
 -------------------------------------------------------------------------------
 """
 import errno
-import simplejson as json
 import os
 import collections
-from simplejson import ordered_dict as ordereddict
+
+import Toonkit_Core.simplejson as json
+from Toonkit_Core.simplejson import ordered_dict as ordereddict
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
