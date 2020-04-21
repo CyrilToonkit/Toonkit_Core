@@ -1,4 +1,4 @@
-import tkProjects.tkProject as tkProject
+import .tkProject
 
 VARIABLES =
 {

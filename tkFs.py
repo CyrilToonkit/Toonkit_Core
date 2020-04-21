@@ -89,7 +89,7 @@ def copy(inInPath, inOutPath=None, inOutDir=None, inUseRobocopy=True, inVerbose=
 @tc.verbosed
 def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, inMove=False, inUseRobocopy=True,
                     inAddVariables=None, inVariablesTranslator=None, inAllowDifferent=None, inUseDifferent=False, inVerbose=DEBUG, inLogger=LOGGER):
-    """Copy ormove file(s) from a hierarchy pattern to another"""
+    """Copy or move file(s) from a hierarchy pattern to another"""
 
 
     if not isinstance(inSourcePatterns, dict):
@@ -118,24 +118,33 @@ def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, in
             if tkcx.match(pattern, srcFile, variables):
                 matched = True
 
-                destPath = tkcx.translate(  srcFile, pattern, inDestinationPatterns[fileType], inAcceptUndefinedResults=True,
-                                    inAddVariables=inAddVariables, inVariablesTranslator=inVariablesTranslator, inAllowDifferent=inAllowDifferent, inUseDifferent=inUseDifferent)
+                destinations = inDestinationPatterns[fileType]
 
-                if not destPath is None:
-                    results.append(destPath)
-                    if inMove:
-                        if inUseRobocopy and srcFile[:3] != destPath[:3]:
-                            inInFolderPath, inInFileName = os.path.split(srcFile)
-                            inOutFolderPath, inOutFileName = os.path.split(destPath)
+                if not isinstance(destinations, (list, tuple)):
+                    destinations = (destinations, )
 
-                            call(["robocopy", inInFolderPath, inOutFolderPath, inInFileName])
-                            os.remove(srcFile)
+                for destination in destinations:
+
+                    destPath = tkcx.translate(  srcFile, pattern, destination, inAcceptUndefinedResults=True,
+                                        inAddVariables=inAddVariables, inVariablesTranslator=inVariablesTranslator, inAllowDifferent=inAllowDifferent, inUseDifferent=inUseDifferent)
+
+                    if not destPath is None:
+                        results.append(destPath)
+                        if inMove and destination == destinations[-1]:
+
+                            if inUseRobocopy and srcFile[:3] != destPath[:3]:
+                                inInFolderPath, inInFileName = os.path.split(srcFile)
+                                inOutFolderPath, inOutFileName = os.path.split(destPath)
+
+                                call(["robocopy", inInFolderPath, inOutFolderPath, inInFileName])
+                                os.remove(srcFile)
+                            else:
+                                shutil.move(srcFile, destPath)
+
+                            LOGGER.info("copyTranslated : File '{0}' moved to '{1}'".format(srcFile, destPath))
                         else:
-                            shutil.move(srcFile, destPath)
-                        LOGGER.info("copyTranslated : File '{0}' moved to '{1}'".format(srcFile, destPath))
-                    else:
-                        copy(srcFile, destPath, inUseRobocopy=inUseRobocopy, inVerbose=inVerbose)
-                        LOGGER.info("copyTranslated : File '{0}' copied to '{1}'".format(srcFile, destPath))
+                            copy(srcFile, destPath, inUseRobocopy=inUseRobocopy, inVerbose=inVerbose)
+                            LOGGER.info("copyTranslated : File '{0}' copied to '{1}'".format(srcFile, destPath))
 
                 break
 
