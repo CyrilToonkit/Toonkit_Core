@@ -30,9 +30,7 @@ VERSIONINFO = "1.0"
 
 class ToonkitCore(Tool):
     def __init__(self, inContext=None, inDebug=True):
-        print "Toonkit Core {0} initializing...".format(VERSIONINFO)
-
-        super(ToonkitCore, self).__init__(inName="ToonkitMayaCore", inDescription="Toonkit's Maya base library",
+        super(ToonkitCore, self).__init__(inName="ToonkitCore", inDescription="Toonkit's base library",
             inUsage="", inVersion=VERSIONINFO, inContext=inContext, inDebug=inDebug, inOptions=None)
 
         self.options = Options(inPath=self.getOptionsPath())

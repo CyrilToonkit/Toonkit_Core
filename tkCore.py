@@ -115,7 +115,7 @@ def getReversedDict(inDict):
 
     reversedDict = {}
 
-    for value, key in inDict.iteritems():
+    for key, value in inDict.iteritems():
         if not value in reversedDict:
             reversedDict[value] = key
 

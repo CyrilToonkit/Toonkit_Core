@@ -29,20 +29,22 @@ import tkContext
 
 def _get(inName):
     mod = None
+
     if sys.version_info >= (2,7):
         import importlib
-        print "importlib"
-        #try:
-        mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
-        #except Exception,e:
-        #    print str(e)
-        #    pass
+        try:
+            mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+        except Exception,e:
+            print str(e)
+            pass
 
     else:
         mod = __import__("Toonkit_Core.tkProjects.projects.{0}".format(inName))
 
     if mod is None:
         return None 
+
+    reload(mod)
 
     toolClass = getattr(mod, inName)
 
@@ -55,8 +57,6 @@ def get(inName):
     projectsFolder = os.path.join(folder, "projects")
     
     subFiles = os.listdir(projectsFolder)
-
-    print "subFiles",subFiles
 
     if inName + ".py" in subFiles:
         project = _get(inName)
@@ -76,6 +76,34 @@ def get(inName):
 
     return project
 
+
+REPOSITORIES = {
+    "default":{}
+}
+
+default =  {
+    "name":{"default"},
+    "entities":{},
+}
+REPOSITORIES["default"] = default
+
 class tkProject:
-	def __init__(self):
-		self.name=None
+    def __init__(self):
+        self.name="tkProject"
+        self._defaultRepository="default"
+        self._repositories = REPOSITORIES
+
+    def getEntitiesPatterns(self, inRepo="default"):
+        repo = self._repositories.get(inRepo)
+        assert repo is not None, "Repository '{}' does not exists !".format(inRepo)
+
+        entities = repo.get("entities")
+        assert entities is not None, "Repository '{0}' does not implement entities key !".format(inRepo)
+
+        return entities
+
+    def getPattern(self, inAsset, inRepo="default"):
+        pattern = self.getEntitiesPatterns(self, inRepo=inRepo).get(inAsset)
+        assert pattern is not None, "Repository '{0}' does not implement asset '{1}' !".format(inRepo, inAsset)
+
+        return pattern
