@@ -28,8 +28,6 @@ import inspect
 import logging
 logging.basicConfig()
 
-import tkProjects.tkProject as tkProject
-
 from tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -46,6 +44,7 @@ TOOL = None
 VERBOSE_ARGNAME = "inVerbose"
 LOGGER_ARGNAME = "inLogger"
 
+OPERATORS = ["==", "!=", ">", "<"]
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   ____                           _                 
@@ -162,11 +161,17 @@ def getTool():
             TOOL = eval("tc.TOOL")
         except:
             pass
-    
+
     if not TOOL:
         TOOL = ToonkitCore()
 
     return TOOL
 
 def getProject(inName=None):
-    return tkProject.get(inName or getTool().options["project"])
+    """Get a project object (current one if no name given)
+    
+    Note : includes a late import of "tkProject" because we have circular dependencies 
+    """
+    from tkProjects.tkProject import tkProject
+
+    return tkProject.getClass(inName or getTool().options["project"])()

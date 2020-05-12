@@ -26,56 +26,9 @@ import os
 import sys
 
 import tkContext
-
-def _get(inName):
-    mod = None
-
-    if sys.version_info >= (2,7):
-        import importlib
-        try:
-            mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
-        except Exception,e:
-            print str(e)
-            pass
-
-    else:
-        mod = __import__("Toonkit_Core.tkProjects.projects.{0}".format(inName))
-
-    if mod is None:
-        return None 
-
-    reload(mod)
-
-    toolClass = getattr(mod, inName)
-
-    return toolClass()
-
-def get(inName):
-    project = None
-
-    folder = os.path.dirname(os.path.realpath(__file__))
-    projectsFolder = os.path.join(folder, "projects")
-    
-    subFiles = os.listdir(projectsFolder)
-
-    if inName + ".py" in subFiles:
-        project = _get(inName)
-
-    if project is None:
-        project = _get("default")
-
-    if project is None and len(subFiles) > 0:
-        for subFile in subFiles:
-            if not subFile.endswith(".py"):
-                continue
-
-                project = _get(subFile[:-3])
-
-                if not project is None:
-                    break
-
-    return project
-
+import tkPipeline as tkpipe
+from .dbEngines.dbEngine import dbEngine
+from tkProjectObj import tkProjectObj
 
 REPOSITORIES = {
     "default":{}
@@ -87,11 +40,64 @@ default =  {
 }
 REPOSITORIES["default"] = default
 
-class tkProject:
-    def __init__(self):
+class tkProject(tkProjectObj):
+    def __init__(self, inEngine=dbEngine(), inType="Project", *args, **kwargs):
+        super(tkProject, self).__init__(inEngine, inType=inType, inParent=None, *args, **kwargs)
+
         self.name="tkProject"
-        self._defaultRepository="default"
-        self._repositories = REPOSITORIES
+        self.pipeline = tkpipe.tkPipeline()
+        self._engine = inEngine
+
+    @staticmethod
+    def _get(inName):
+        mod = None
+
+        if sys.version_info >= (2,7):
+            import importlib
+            try:
+                mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+            except Exception,e:
+                print str(e)
+                pass
+
+        else:
+            mod = __import__("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+
+        if mod is None:
+            return None 
+
+        reload(mod)
+
+        toolClass = getattr(mod, inName)
+
+        return toolClass
+
+    @staticmethod
+    def getClass(inName):
+        project = None
+
+        folder = os.path.dirname(os.path.realpath(__file__))
+        projectsFolder = os.path.join(folder, "projects")
+        
+        subFiles = os.listdir(projectsFolder)
+
+        if inName + ".py" in subFiles:
+            project = tkProject._get(inName)
+
+        if project is None:
+            project = tkProject._get("default")
+
+        if project is None and len(subFiles) > 0:
+            for subFile in subFiles:
+                if not subFile.endswith(".py"):
+                    continue
+
+                    project = tkProject._get(subFile[:-3])
+
+                    if not project is None:
+                        break
+
+        return project
 
     def getEntitiesPatterns(self, inRepo="default"):
         repo = self._repositories.get(inRepo)
@@ -103,7 +109,10 @@ class tkProject:
         return entities
 
     def getPattern(self, inAsset, inRepo="default"):
-        pattern = self.getEntitiesPatterns(self, inRepo=inRepo).get(inAsset)
+        pattern = self.getEntitiesPatterns(inRepo=inRepo).get(inAsset)
         assert pattern is not None, "Repository '{0}' does not implement asset '{1}' !".format(inRepo, inAsset)
 
         return pattern
+
+    def getDefaultKeys(self, inEntityType, inTranslate=False):
+        return self._engine.getDefaultKeys(inEntityType, inTranslate=inTranslate)

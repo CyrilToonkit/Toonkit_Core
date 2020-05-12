@@ -129,6 +129,60 @@ def freeVariable(inEnclosedVariable):
 def encloseVariable(inFreeVariable):
     return SEP_VARIABLE_START + inFreeVariable + SEP_VARIABLE_END
 
+def getVariables(inPattern, inNamesOnly=False):
+    variables = re.findall(RE_VARIABLES, inPattern)
+    if inNamesOnly:
+        return [splitReVariable(variable)[0] for variable in variables]
+
+    return variables
+
+def replaceVariables(inPattern, inReplace="*"):
+    variables = getVariables(inPattern)
+
+    specialChars = ["[", "]", "{", "}", ".", "+", "*"]
+
+    escapedVariables = []
+    for variable in variables:
+        for specialChar in specialChars:
+            variable = variable.replace(specialChar, "\\" + specialChar)
+
+        escapedVariables.append(variable)
+
+    print "re.sub(", "|".join(escapedVariables), inReplace, inPattern
+
+    return re.sub("|".join(escapedVariables), inReplace, inPattern)
+
+def toReg(inPattern):
+    reg = inPattern
+    
+    managedVariables = []
+
+    variables = getVariables(inPattern)
+
+    for variable in variables:
+        variableName, variableReg = splitReVariable(variable)
+        if variableName in managedVariables:
+            continue
+        managedVariables.append(variableName)
+        
+        reg = reg.replace(variable, variableReg)
+        
+    return reg
+
+def replaceVariables(inPattern, inReplace="*"):
+    variables = getVariables(inPattern)
+
+    specialChars = ["[", "]", "{", "}"]
+
+    escapedVariables = []
+    for variable in variables:
+        for specialChar in specialChars:
+            variable = variable.replace(specialChar, "\\" + specialChar)
+
+        escapedVariables.append(variable)
+
+    return re.sub("|".join(escapedVariables), inReplace, inPattern)
+
 def expandVariables(inPattern, inVariables=None):
     parseAblePath = inPattern
 

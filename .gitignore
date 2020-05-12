@@ -1,3 +1,4 @@
 *.pyc
 *.json
 Preferences
+/tkProjects/dbEngines/ShotgunEngine
