@@ -42,7 +42,6 @@ class Option(object):
         self.set(inValue, inDescription, inNiceName, inOptional, inCategory, inMin, inMax, inValues)
         self._type = None
 
-
     def set(self, inValue, inDescription=DEFAULT_DESC, inNiceName=None, inOptional=False, inCategory=None, inMin=None, inMax=None, inValues=None):
         self.niceName = self.name if inNiceName is None else inNiceName
         self.defaultValue = inValue
@@ -57,8 +56,12 @@ class Option(object):
     def type(self):
         if self._type is None:
             self._type = type(self.defaultValue).__name__
+
             if self._type in TYPES_SIBLINGS:
                 self._type = TYPES_SIBLINGS[self._type]
+
+            if self._type == "int" and not self.values is None and len(self.values) > 0:
+                self._type = "enum"
 
         return self._type
 
