@@ -175,3 +175,6 @@ def getProject(inName=None):
     from tkProjects.tkProject import tkProject
 
     return tkProject.getClass(inName or getTool().options["project"])()
+
+def getProjects():
+    return ["demo"]

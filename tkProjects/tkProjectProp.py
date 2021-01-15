@@ -27,14 +27,13 @@ from datetime import datetime, timedelta
 class tkProjectProp(object):
     LIFETIME = 10000#in milliseconds
 
-    def __init__(self, inName, inValue=None, inImmortal=False):
+    def __init__(self, inName, inValue=(), inImmortal=False):
         self.name  =inName
         self._value=inValue
-        self._obsolete = inValue is None
+        self._obsolete = inValue is tuple
         self._date = datetime.now()
         self.immortal = inImmortal
 
-        self._obsolete = inValue is None
         self._modified = False
 
     @property
