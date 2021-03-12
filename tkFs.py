@@ -152,3 +152,27 @@ def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, in
             LOGGER.warning("File '{}' does not match any patterns !".format(srcFile))
 
     return results
+
+@tc.verbosed
+def cleanPycs(inPath, inRecursive=True, inDryRun=False, inVerbose=DEBUG, inLogger=LOGGER):
+    """Delete '.pyc's if the corresponding '.py' exists"""
+    deletedFiles = []
+
+    if os.path.isfile(inPath):
+        pass
+    else:
+        for elem in os.listdir(inPath):
+            elemPath = os.path.join(inPath, elem)
+            if os.path.isfile(elemPath):
+                if elemPath.endswith(".pyc"):
+                    if os.path.isfile(elemPath.replace(".pyc", ".py")):
+                        deletedFiles.append(elemPath)
+                        if not inDryRun:
+                            os.remove(elemPath)
+                        LOGGER.info("{}Removed {}".format("DRYRUN " if inDryRun else "", elem, elemPath))
+                    else:
+                        LOGGER.warning("WARNING : {} have no '.py' equivalent ({}) !".format(elem, elemPath))
+            elif inRecursive:
+                cleanPycs(elemPath, inRecursive=True)
+
+    return deletedFiles
