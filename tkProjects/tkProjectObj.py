@@ -89,6 +89,7 @@ class tkProjectObj(object):
             if prop.obsolete:
                 LOGGER.debug("Property {0} was obsolete, retrieve from db...".format(prop.name))
                 entity = self.engine.getOne(self.type, self, inKeys=[name])
+                print "entity",entity
 
                 if entity is None or not name in entity._properties:
                     prop.value = None
