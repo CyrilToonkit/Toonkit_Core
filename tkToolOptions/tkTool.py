@@ -22,7 +22,7 @@
 import os
 import sys
 
-from tkOptions import Options 
+from Toonkit_Core.tkToolOptions.tkOptions import Options 
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -68,7 +68,7 @@ class Tool(object):
         return inTool
 
     def getToolsRepos(self):
-        return ["tkToolOptions"]
+        return ["tkToolOptions", "tkMayaTools"]
 
     def getChildTool(self, inToolName):
         if inToolName in self.children:

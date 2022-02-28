@@ -22,9 +22,14 @@
 import errno
 import os
 import collections
+import six
+basestring = six.string_types
 
 import Toonkit_Core.simplejson as json
-from Toonkit_Core.simplejson import ordered_dict as ordereddict
+try:
+    from collections import OrderedDict as ordereddict
+except:
+    from Toonkit_Core.simplejson import ordered_dict as ordereddict
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -82,7 +87,7 @@ class Options(object):
 
         if self.__options is None:
             self.__options = []
-            for key, value in self.__data.iteritems():
+            for key, value in self.__data.items():
                 self.addOption(key, value)
 
         self._changedCallbacks = []
@@ -116,7 +121,7 @@ class Options(object):
         return '%s(%r)' % (self.__class__.__name__, self.__data.items())
 
     def iteritems(self):
-        return self.__data.iteritems()
+        return self.__data.items()
 
     def __len__(self):
         return len(self.__data)
@@ -134,7 +139,7 @@ class Options(object):
     @data.setter
     def data(self, value):
         changingValues = []
-        for key, dataValue in value.iteritems():
+        for key, dataValue in value.items():
             oldVal = self.__data.get(key)
             if oldVal != dataValue:
                 changingValues.append({"option":self.getOption(key, dataValue), "old":oldVal, "new":dataValue})
@@ -239,7 +244,7 @@ class Options(object):
                 if not os.path.exists(dirname):
                     try:
                         os.makedirs(dirname)
-                    except OSError, exc: # Guard against race condition
+                    except OSError as exc: # Guard against race condition
                         if exc.errno != errno.EEXIST:
                             raise exc
 
@@ -248,13 +253,13 @@ class Options(object):
             else:#Asssume it's a file-like object
                 try:
                     inPath.write(Options.serialize(self.__data))
-                except Exception, exp:
+                except Exception as exp:
                     inPath.close()
                     raise exp
 
                 inPath.close()
-        except Exception, e:
-            print "Error saving options : {0}".format(e)
+        except Exception as e:
+            print ("Error saving options : {0}".format(e))
             return False
 
         return True
@@ -282,8 +287,8 @@ class Options(object):
                     inPath.close()
 
             assert self.__data is not None, "Can't load data from {0}".format(inPath)
-        except Exception, e:
-            print "Can't load options : {0}".format(e)
+        except Exception as e:
+            print ("Can't load options : {0}".format(e))
             return False
 
         return True

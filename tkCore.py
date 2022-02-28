@@ -26,9 +26,12 @@ __author__ = "Cyril GIBAUD - Toonkit"
 
 import inspect
 import logging
+import six
+basestring = six.string_types
 logging.basicConfig()
 
-from tkToolOptions.ToonkitCore import ToonkitCore
+#from tkToolOptions.ToonkitCore import ToonkitCore
+from Toonkit_Core.tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
    ____                _              _       
@@ -45,6 +48,8 @@ VERBOSE_ARGNAME = "inVerbose"
 LOGGER_ARGNAME = "inLogger"
 
 OPERATORS = ["==", "!=", ">", "<"]
+
+LINESEP = "\n"
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   ____                           _                 

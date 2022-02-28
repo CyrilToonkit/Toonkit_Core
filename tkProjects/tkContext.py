@@ -99,7 +99,7 @@ def setSynTax(inVariableSep=SEP_VARIABLE, inVariableStart=SEP_VARIABLE_START, in
     SEP_VARIABLE_START_LENGTH = len(SEP_VARIABLE_START)
     SEP_VARIABLE_END_LENGTH = len(SEP_VARIABLE_END)
 
-    RE_VARIABLES = re.compile(u'('+SEP_VARIABLE_START+ur'.*?[^\d]'+SEP_VARIABLE_END+u')')
+    RE_VARIABLES = re.compile(u'('+SEP_VARIABLE_START+r'.*?[^\d]'+SEP_VARIABLE_END+u')')
 
 setSynTax()
 
@@ -148,7 +148,7 @@ def replaceVariables(inPattern, inReplace="*"):
 
         escapedVariables.append(variable)
 
-    print "re.sub(", "|".join(escapedVariables), inReplace, inPattern
+    print ("re.sub(", "|".join(escapedVariables), inReplace, inPattern)
 
     return re.sub("|".join(escapedVariables), inReplace, inPattern)
 
@@ -258,7 +258,7 @@ def match(inPattern, inString, inVariables=None):
                     variableReg = variableReg.replace("<"+index+">", "")
 
             if "\\" in variableReg:
-                print "WARNING : Please don't use escaped characters in variables regular expressions !"
+                print ("WARNING : Please don't use escaped characters in variables regular expressions !")
 
             pattern = pattern.replace(variable, "("+variableReg+")")
 
@@ -363,7 +363,7 @@ def resolvePath(inPath, inVariables=None, inAcceptUndefinedResults=False, inVerb
 #todo "Create" mode ?
 def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, inFiles=True, inFolders=True, inAcceptUndefinedResults=False, inVerbose=False):
     if inVerbose:
-        print "! collectPath called (inPath={0}, inVariables={1}, inMaxResults={2},inRootExists={3},inFiles={4},inFolders={5},inAcceptUndefinedResults={6})".format(inPath, inVariables,inMaxResults,inRootExists,inFiles,inFolders,inAcceptUndefinedResults)
+        print ("! collectPath called (inPath={0}, inVariables={1}, inMaxResults={2},inRootExists={3},inFiles={4},inFolders={5},inAcceptUndefinedResults={6})".format(inPath, inVariables,inMaxResults,inRootExists,inFiles,inFolders,inAcceptUndefinedResults))
 
     #Todo maybe we can be smart on the way we want to confirm existence of root... 
     inRootExists = False
@@ -380,8 +380,8 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
     variables = re.findall(RE_VARIABLES, parseAblePath)
 
     if inVerbose:
-        print "parseAblePath",parseAblePath
-        print "variables", variables
+        print ("parseAblePath",parseAblePath)
+        print ("variables", variables)
 
     #Need real parsing
     if len(variables) > 0:
@@ -389,7 +389,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
         if len(splitPath[0]) + len(splitPath[1]) == 0:
             #Shoud be a windows network root
             del splitPath[:2]
-            splitPath[0] = ur"\\" + splitPath[0]
+            splitPath[0] = r"\\" + splitPath[0]
 
         #Manage case where os.path.sep == "\" and could be used as regexp escape characher...
         if os.path.sep == "\\":
@@ -408,7 +408,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
             confirmedPath = splitPath[0]
             checkings+=1
         elif inVerbose:
-            print "Path {0} does not exists !".format(splitPath[0])
+            print ("Path {0} does not exists !".format(splitPath[0]))
 
         if confirmedPath != None:
             item = splitPath[1]
@@ -475,7 +475,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
             results = [(parseAblePath,inVariables)]
 
     if inVerbose:
-        print "! resolvePath performed {0} file checks and {1} directories parsing".format(checkings, parsings)
+        print ("! resolvePath performed {0} file checks and {1} directories parsing".format(checkings, parsings))
 
     return results
 
