@@ -102,7 +102,7 @@ class Tool(object):
         if "inPrefix" in kwargs:
             inPrefix = kwargs["inPrefix"]
 
-        print ((inPrefix + " ") if len(inPrefix) > 0 else "") + "{0} : {1}".format(self.name, " ".join([str(arg) for arg in args]))
+        print (((inPrefix + " ") if len(inPrefix) > 0 else "") + "{0} : {1}".format(self.name, " ".join([str(arg) for arg in args])))
 
     def logDebug(self, *args):
         if not self.debug and (not self.parent or not self.parent.debug):
