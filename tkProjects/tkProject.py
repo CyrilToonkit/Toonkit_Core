@@ -24,6 +24,7 @@ __author__ = "Cyril GIBAUD - Toonkit"
 
 import os
 import sys
+from imp import reload
 
 import tkContext
 import tkPipeline as tkpipe
@@ -56,8 +57,8 @@ class tkProject(tkProjectObj):
             import importlib
             try:
                 mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
-            except Exception,e:
-                print str(e)
+            except Exception as e:
+                print (str(e))
                 pass
 
         else:

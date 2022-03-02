@@ -89,7 +89,7 @@ class tkProjectObj(object):
             if prop.obsolete:
                 LOGGER.debug("Property {0} was obsolete, retrieve from db...".format(prop.name))
                 entity = self.engine.getOne(self.type, self, inKeys=[name])
-                print "entity",entity
+                print ("entity",entity)
 
                 if entity is None or not name in entity._properties:
                     prop.value = None
@@ -146,8 +146,8 @@ class tkProjectObj(object):
                 mod = importlib.import_module("Toonkit_Core.tkProjects.tk{0}".format(inName))
             else:
                 mod = __import__("Toonkit_Core.tkProjects.tk{0}".format(inName))
-        except Exception,e:
-            print str(e)
+        except Exception as e:
+            print (str(e))
 
         if mod is None:
             return tkProjectObj
@@ -192,8 +192,8 @@ class tkProjectObj(object):
                 matches = True
                 for internalFilter in internalFilters:
                     code = "result.{0}{1} {2} {3}".format(*internalFilter)
-                    print "!!! matchesFilter ",eval(code), code
-                    print "!!! val ",eval("result.{0}{1}".format(internalFilter[0], internalFilter[1]))
+                    print ("!!! matchesFilter ",eval(code), code)
+                    print ("!!! val ",eval("result.{0}{1}".format(internalFilter[0], internalFilter[1])))
                     if not eval(code):
                         matches = False
                         break
