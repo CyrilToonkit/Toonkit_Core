@@ -177,7 +177,7 @@ class QSpinBoxGrp(QtWidgets.QHBoxLayout):
     editingStarted = QtCore.Signal()
     editingFinished = QtCore.Signal(list)
 
-    def __init__(self, parent=None, label = None, value=0.0, uiMax = 10, max = 10000, uiMin = -10, min = -10000, decimals = 3):
+    def __init__(self, parent=None, label = None, value=0.0, uiMax = 10, maximum = 10000, uiMin = -10, minimum = -10000, decimals = 3):
         """
             :param parent: Parent of the component. None by deflaut.
             :param label: Label displayed at the left of the component. None by default.
@@ -204,10 +204,12 @@ class QSpinBoxGrp(QtWidgets.QHBoxLayout):
         self.mouseClicked = False
 
         # Property:
-        self.max = max
-        self.min = min
-        self.uiMax = uiMax
-        self.uiMin = uiMin
+        self.max = maximum
+        self.min = minimum
+
+        self.uiMax = min([uiMax, maximum])
+        self.uiMin = max([uiMin, minimum])
+
         self.values = [0.0]
         self.decimals = int(decimals)
         
