@@ -179,7 +179,7 @@ class Tool(object):
         return "{0}UI".format(self.name)
 
     def getOption(self, inName):
-        return self.options.getOption(inName, inCreate=False):
+        return self.options.getOption(inName, inCreate=False)
 
     def getCategorizedOptions(self):
         categs = []
