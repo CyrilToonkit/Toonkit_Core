@@ -92,11 +92,14 @@ class Options(object):
 
         self._changedCallbacks = []
 
-    def getOption(self, inName, inValue=None, inOptions=None):
+    def getOption(self, inName, inValue=None, inOptions=None, inCreate=True):
         options = inOptions or self.__options
         for opt in options:
             if opt.name == inName:
                 return opt
+
+        if not inCreate:
+            return
 
         return self.addOption(inName, inValue)
 
