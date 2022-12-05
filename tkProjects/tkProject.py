@@ -28,7 +28,7 @@ from imp import reload
 
 import tkContext
 import tkPipeline as tkpipe
-from .dbEngines.dbEngine import dbEngine
+from dbEngines.dbEngine import dbEngine
 from tkProjectObj import tkProjectObj
 
 REPOSITORIES = {
