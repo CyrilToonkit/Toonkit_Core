@@ -26,10 +26,10 @@ import os
 import sys
 from imp import reload
 
-from . import tkContext
-from . import tkPipeline as tkpipe
-from .dbEngines.dbEngine import dbEngine
-from .tkProjectObj import tkProjectObj
+import tkContext
+import tkPipeline as tkpipe
+from dbEngines.dbEngine import dbEngine
+from tkProjectObj import tkProjectObj
 
 REPOSITORIES = {
     "default":{}

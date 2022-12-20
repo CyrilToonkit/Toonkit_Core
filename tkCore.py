@@ -30,7 +30,8 @@ import six
 basestring = six.string_types
 logging.basicConfig()
 
-from .tkToolOptions.ToonkitCore import ToonkitCore
+#from tkToolOptions.ToonkitCore import ToonkitCore
+from Toonkit_Core.tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
    ____                _              _       

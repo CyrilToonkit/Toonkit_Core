@@ -22,7 +22,7 @@
 import os
 import sys
 
-from .tkOptions import Options 
+from Toonkit_Core.tkToolOptions.tkOptions import Options 
 
 __author__ = "Cyril GIBAUD - Toonkit"
 

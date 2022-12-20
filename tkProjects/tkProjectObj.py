@@ -34,10 +34,10 @@ from imp import reload
 import six
 basestring = six.string_types
 
-from . import tkContext
-from .dbEngines.dbEngine import dbEngine
-from .tkProjectProp import tkProjectProp
-from .. import tkCore as tc
+import tkContext
+from dbEngines.dbEngine import dbEngine
+from tkProjectProp import tkProjectProp
+import Toonkit_Core.tkCore as tc
 
 class tkProjectObj(object):
     PROTECTEDMEMBERS = [

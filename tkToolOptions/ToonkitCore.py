@@ -21,8 +21,8 @@
 """
 import os
 
-from .tkOptions import Options
-from .tkTool import Tool
+from Toonkit_Core.tkToolOptions.tkOptions import Options
+from Toonkit_Core.tkToolOptions.tkTool import Tool
 
 __author__ = "Cyril GIBAUD - Toonkit"
 

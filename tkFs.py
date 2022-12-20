@@ -33,8 +33,8 @@ DEBUG = False
 
 import os
 import shutil
-from . import tkCore as tc
-from .tkProjects import tkContext as tkcx
+import tkCore as tc
+import tkProjects.tkContext as tkcx
 
 @tc.verbosed
 def makedirs(inPath, inVerbose=DEBUG, inLogger=LOGGER):

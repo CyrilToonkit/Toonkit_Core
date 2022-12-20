@@ -25,11 +25,11 @@ import collections
 import six
 basestring = six.string_types
 
-from .. import simplejson as json
+import Toonkit_Core.simplejson as json
 try:
     from collections import OrderedDict as ordereddict
 except:
-    from ..simplejson import ordered_dict as ordereddict
+    from Toonkit_Core.simplejson import ordered_dict as ordereddict
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
