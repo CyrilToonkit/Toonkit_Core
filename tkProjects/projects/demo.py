@@ -27,8 +27,8 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
 DEBUG = True
 
-from Toonkit_Core.tkProjects.tkProject import tkProject
-from Toonkit_Core.tkProjects.dbEngines.ShotgunEngine.ShotgunEngine import shotgunEngine
+from ..tkProject import tkProject
+from ..dbEngines.ShotgunEngine.ShotgunEngine import shotgunEngine
 
 REPOSITORIES = {
     "default":{},"tkDeliverIN":{},"tkDeliverOUT":{},"tsuProd":{},"tsuDeliver":{}

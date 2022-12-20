@@ -1,5 +1,5 @@
 import logging
-import tkFs 
+from . import tkFs 
 
 CRITICAL = 50
 ERROR = 40
