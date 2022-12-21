@@ -31,7 +31,7 @@ basestring = six.string_types
 logging.basicConfig()
 
 #from tkToolOptions.ToonkitCore import ToonkitCore
-from Toonkit_Core.tkToolOptions.ToonkitCore import ToonkitCore
+from .tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
    ____                _              _       
@@ -67,7 +67,7 @@ def verbosed(func):
 
         #inspect for arguments
         argspec = inspect.getargspec(func)
-        defaultArguments = list(reversed(zip(reversed(argspec.args), reversed(argspec.defaults))))
+        defaultArguments = list(reversed(list(zip(reversed(argspec.args), reversed(argspec.defaults)))))
 
         all_kwargs = kwargs.copy()
         for arg, value in defaultArguments:
@@ -177,7 +177,7 @@ def getProject(inName=None):
     
     Note : includes a late import of "tkProject" because we have circular dependencies 
     """
-    from tkProjects.tkProject import tkProject
+    from .tkProjects.tkProject import tkProject
 
     return tkProject.getClass(inName or getTool().options["project"])()
 

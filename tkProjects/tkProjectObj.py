@@ -30,14 +30,11 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.WARNING)
 
 from functools import partial
-from imp import reload
-import six
-basestring = six.string_types
 
-import tkContext
-from dbEngines.dbEngine import dbEngine
-from tkProjectProp import tkProjectProp
-import Toonkit_Core.tkCore as tc
+from . import tkContext
+from .dbEngines.dbEngine import dbEngine
+from .tkProjectProp import tkProjectProp
+from .. import tkCore as tc
 
 class tkProjectObj(object):
     PROTECTEDMEMBERS = [
@@ -56,7 +53,7 @@ class tkProjectObj(object):
         self.type = inType
         self.parent = inParent
 
-        for key, value in kwargs.items():
+        for key, value in kwargs.iteritems():
             translatedKey = self.engine.untranslate(key, self.type)
 
             self._properties[translatedKey] = tkProjectProp(translatedKey, value, inImmortal=translatedKey.endswith("id"))
@@ -124,7 +121,7 @@ class tkProjectObj(object):
     def __repr__(self):
         return "{0} ({1}) - {2}".format(
             self.name, self.type,
-            {key:value._value for key, value in self._properties.items() if not key in self.PROTECTEDMEMBERS}
+            {key:value._value for key, value in self._properties.iteritems() if not key in self.PROTECTEDMEMBERS}
             )
 
     @property
@@ -169,7 +166,7 @@ class tkProjectObj(object):
         internalFilters = []
 
         filters = []
-        for criterion, value in kwargs.items():
+        for criterion, value in kwargs.iteritems():
             operator = "=="
             if isinstance(value, (list, tuple)):
                 if len(value) == 2 and value[0] in tc.OPERATORS:
@@ -218,7 +215,7 @@ class tkProjectObj(object):
 
     @property
     def modifiedProperties(self):
-        return {name:prop for name,prop in self._properties.items() if prop._modified}
+        return {name:prop for name,prop in self._properties.iteritems() if prop._modified}
 
     def _updateProperties(self, inProperties):
         self._properties = inProperties

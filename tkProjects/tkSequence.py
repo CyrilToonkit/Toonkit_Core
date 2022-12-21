@@ -25,9 +25,9 @@ __author__ = "Cyril GIBAUD - Toonkit"
 import os
 import sys
 
-import tkContext
+from . import tkContext
 from .dbEngines.dbEngine import dbEngine
-from tkProjectObj import tkProjectObj
+from .tkProjectObj import tkProjectObj
 
 class tkSequence(tkProjectObj):
     def __init__(self, inEngine=dbEngine(), inType="Sequence", *args, **kwargs):

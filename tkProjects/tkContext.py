@@ -136,22 +136,6 @@ def getVariables(inPattern, inNamesOnly=False):
 
     return variables
 
-def replaceVariables(inPattern, inReplace="*"):
-    variables = getVariables(inPattern)
-
-    specialChars = ["[", "]", "{", "}", ".", "+", "*"]
-
-    escapedVariables = []
-    for variable in variables:
-        for specialChar in specialChars:
-            variable = variable.replace(specialChar, "\\" + specialChar)
-
-        escapedVariables.append(variable)
-
-    print ("re.sub(", "|".join(escapedVariables), inReplace, inPattern)
-
-    return re.sub("|".join(escapedVariables), inReplace, inPattern)
-
 def toReg(inPattern):
     reg = inPattern
     

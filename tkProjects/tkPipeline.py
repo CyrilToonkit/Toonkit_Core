@@ -50,8 +50,8 @@ logging.basicConfig()
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
 
-import tkContext
-from tkProjectData import tkProjectData
+from . import tkContext
+from .tkProjectData import tkProjectData
 
 __author__ = "Cyril GIBAUD - Toonkit"
 

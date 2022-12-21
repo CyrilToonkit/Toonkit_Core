@@ -22,7 +22,7 @@
 import os
 import sys
 
-from Toonkit_Core.tkToolOptions.tkOptions import Options 
+from .tkOptions import Options 
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -191,7 +191,8 @@ class Tool(object):
             else:
                 unorderedDict[opt.category].append(opt)
 
-        categs.sort()
+        print(categs)
+        categs.sort(key = lambda e: e or " ")
 
         ordered = Options.OrderedDict()
 
