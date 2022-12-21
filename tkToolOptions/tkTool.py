@@ -191,7 +191,6 @@ class Tool(object):
             else:
                 unorderedDict[opt.category].append(opt)
 
-        print(categs)
         categs.sort(key = lambda e: e or " ")
 
         ordered = Options.OrderedDict()
