@@ -25,16 +25,17 @@ __author__ = "Cyril GIBAUD - Toonkit"
 import os
 import sys
 import logging
-logging.basicConfig()
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.WARNING)
-
+from .. import tkLogger
+from imp import reload
 from functools import partial
-
 from . import tkContext
 from .dbEngines.dbEngine import dbEngine
 from .tkProjectProp import tkProjectProp
 from .. import tkCore as tc
+
+try:basestring
+except:basestring=str
+
 
 class tkProjectObj(object):
     PROTECTEDMEMBERS = [
@@ -53,7 +54,7 @@ class tkProjectObj(object):
         self.type = inType
         self.parent = inParent
 
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             translatedKey = self.engine.untranslate(key, self.type)
 
             self._properties[translatedKey] = tkProjectProp(translatedKey, value, inImmortal=translatedKey.endswith("id"))
@@ -61,12 +62,11 @@ class tkProjectObj(object):
             if translatedKey == "name":
                 self.name=value
 
-
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__["name"]
 
-        LOGGER.debug("__getattr__ {0} ({1})".format(name, self))
+        tkLogger.debug("__getattr__ {0} ({1})".format(name, self))
 
         multi = name.endswith("s")
 
@@ -87,7 +87,7 @@ class tkProjectObj(object):
             prop = self._properties[name]
 
             if prop.obsolete:
-                LOGGER.debug("Property {0} was obsolete, retrieve from db...".format(prop.name))
+                tkLogger.debug("Property {0} was obsolete, retrieve from db...".format(prop.name))
                 entity = self.engine.getOne(self.type, self, inKeys=[name])
                 print ("entity",entity)
 
@@ -111,7 +111,7 @@ class tkProjectObj(object):
             self.__dict__[name] = value
             return
 
-        LOGGER.debug("__setattr__ {0}:{1} ({2})".format(name, value, self))
+        tkLogger.debug("__setattr__ {0}:{1} ({2})".format(name, value, self))
 
         if not name in self.__dict__["_properties"]:
             self.__dict__["_properties"][name] = tkProjectProp(name, value)
@@ -121,7 +121,7 @@ class tkProjectObj(object):
     def __repr__(self):
         return "{0} ({1}) - {2}".format(
             self.name, self.type,
-            {key:value._value for key, value in self._properties.iteritems() if not key in self.PROTECTEDMEMBERS}
+            {key:value._value for key, value in self._properties.items() if not key in self.PROTECTEDMEMBERS}
             )
 
     @property
@@ -157,6 +157,7 @@ class tkProjectObj(object):
         return getattr(mod, "tk" + inName)
 
     def get(self, inEntityType, *args, **kwargs):
+
         limit = 0
 
         if "inLimit" in kwargs:
@@ -166,7 +167,7 @@ class tkProjectObj(object):
         internalFilters = []
 
         filters = []
-        for criterion, value in kwargs.iteritems():
+        for criterion, value in kwargs.items():
             operator = "=="
             if isinstance(value, (list, tuple)):
                 if len(value) == 2 and value[0] in tc.OPERATORS:
@@ -215,7 +216,7 @@ class tkProjectObj(object):
 
     @property
     def modifiedProperties(self):
-        return {name:prop for name,prop in self._properties.iteritems() if prop._modified}
+        return {name:prop for name,prop in self._properties.items() if prop._modified}
 
     def _updateProperties(self, inProperties):
         self._properties = inProperties

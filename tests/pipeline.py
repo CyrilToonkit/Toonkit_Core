@@ -1,4 +1,5 @@
-import Toonkit_Core.tkProjects.tkPipeline as tkpipe
+from imp import reload
+from ..tkProjects import tkPipeline as tkpipe
 reload(tkpipe)
 
 pipe = tkpipe.tkPipeline()
@@ -19,4 +20,4 @@ pipe.addPattern("ShotPath", r"{ProjectPath}\FILM\{ShotLongName}\{ShotFile}")
 
 #pipe.context = {"Episode":"swimming", "SeqNumber":1, "CutNumber":10, "Task":"blocking", "Version":1}
 
-print pipe.getPattern("ShotPath")
+print (pipe.getPattern("ShotPath"))

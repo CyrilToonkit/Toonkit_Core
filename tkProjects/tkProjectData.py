@@ -36,7 +36,7 @@ class tkProjectData(object):
             
             for overrideDict, overrideValue in self._overrides:
                 matches = True
-                for key, value in overrideDict.iteritems():
+                for key, value in overrideDict.items():
                     if not key in inDict or inDict[key] != value:
                         matches = False
                         break

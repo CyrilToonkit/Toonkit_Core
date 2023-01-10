@@ -27,9 +27,9 @@ basestring = six.string_types
 
 from .. import simplejson as json
 try:
-    from collections import OrderedDict as ordereddict
-except:
     from ..simplejson import ordered_dict as ordereddict
+except:
+    from collections import OrderedDict as ordereddict
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -126,6 +126,9 @@ class Options(object):
     def iteritems(self):
         return self.__data.items()
 
+    def items(self):
+        return self.__data.items()
+        
     def __len__(self):
         return len(self.__data)
 

@@ -1,22 +1,23 @@
-import Toonkit_Core.tkProjects.tkProjectProp as tpr
+from imp import reload
+from ..tkProjects import tkProjectProp as tpr
 reload(tpr)
-import Toonkit_Core.tkProjects.tkProjectObj as to
+from ..tkProjects import tkProjectObj as to
 reload(to)
 
-import Toonkit_Core.tkProjects.tkAsset as ta
+from ..tkProjects import tkAsset as ta
 reload(to)
 
-import Toonkit_Core.tkProjects.tkProject as tp
+from ..tkProjects import tkProject as tp
 reload(tp)
 
-import Toonkit_Core.tkProjects.dbEngines.dbEngine as dbEngine
+from ..tkProjects.dbEngines import dbEngine as dbEngine
 reload(dbEngine)
 
-import Toonkit_Core.tkProjects.dbEngines.ShotgunEngine.ShotgunEngine as shotgunEngine
+from ..tkProjects.dbEngines.ShotgunEngineimport import ShotgunEngine as shotgunEngine
 reload(shotgunEngine)
 
 
-import Toonkit_Core.tkProjects.projects.demo as demo
+from ..tkProjects.projects import demo as demo
 reload(demo)
 
 import Toonkit_Core.tkCore as tc
@@ -36,22 +37,22 @@ reload(tc)
 #-----------------------------------------------------
 
 for asset in tc.getProject().Assets:
-    print asset
+    print (asset)
     for shot in asset.Shots:
-        print " - {0}".format(shot)
+        print (" - {0}".format(shot))
 
 #Go through an asset Tasks and print their Notes
 #-----------------------------------------------------
-asset = tc.getProject().GetAsset(name="marmotte"):
+asset = tc.getProject().GetAsset(name="marmotte")
 for task in asset.Tasks:
-    print task
+    print (task)
     for note in task.Notes:
-        print " - {0}".format(note)
+        print (" - {0}".format(note))
 
 #Go through all Shots that are not "omt"
 #-----------------------------------------------------
 for shot in tc.getProject().GetShots(status=("!=", "omt")):
-    print shot
+    print (shot)
 
 
 
@@ -62,16 +63,16 @@ for shot in tc.getProject().GetShots(status=("!=", "omt")):
 sequenceDuration = 0
 for shot in tc.getProject().GetEpisode(name="swimming").GetSequence(SeqNumber=1).Shots:
     sequenceDuration += shot.duration
-print "sequenceDuration",sequenceDuration
+print ("sequenceDuration",sequenceDuration)
 
 #Files/paths
 #-------------------------------
 
 #3 TODO : Get the "last" path of an asset, given its step
-print tc.getProject().GetAsset(name="marmotte").GetPath(step="rig")#or .GetPath(Step="rig", Version=-1)
+print (tc.getProject().GetAsset(name="marmotte").GetPath(step="rig"))#or .GetPath(Step="rig", Version=-1)
 
 #3 TODO : Get all the existings paths of an asset, given its step
-print tc.getProject().GetAsset(name="marmotte").GetPaths(step="mod")
+print (tc.getProject().GetAsset(name="marmotte").GetPaths(step="mod"))
 
 
 
@@ -83,7 +84,7 @@ print tc.getProject().GetAsset(name="marmotte").GetPaths(step="mod")
 #-----------------------------------------------------
 
 marmotte = tc.getProject().GetAsset(name="marmotte")
-print "1 : Original", marmotte.status
+print ("1 : Original", marmotte.status)
 #Try to push without changing anything
 marmotte.push()
 #We get a warning indicating nothing has changed, if we want to force-push use
@@ -91,13 +92,13 @@ marmotte.push()
 
 #Actually change the value
 marmotte.status = "apr"
-print "2 : Set to 'apr'", marmotte.status
+print ("2 : Set to 'apr'", marmotte.status)
 #The changed property is visible in "modifiedProperties" dict
-print "2 : modified properties", marmotte.modifiedProperties
+print ("2 : modified properties", marmotte.modifiedProperties)
 
 #If we pull here we lose the modifications
 marmotte.pull()
-print "3 : pulled back to original", marmotte.status
+print ("3 : pulled back to original", marmotte.status)
 
 #Change the value again...
 marmotte.status = "apr"
@@ -107,7 +108,7 @@ marmotte.push()
 
 #Value changed, even if pulled back again
 marmotte.pull()
-print "4 : Set to 'apr' and pushed ", marmotte.status
+print ("4 : Set to 'apr' and pushed ", marmotte.status)
 
 #4 TODO : Link an asset to a shot
 #-----------------------------------------------------

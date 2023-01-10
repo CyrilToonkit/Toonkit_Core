@@ -30,6 +30,11 @@ from . import tkContext
 from . import tkPipeline as tkpipe
 from .dbEngines.dbEngine import dbEngine
 from .tkProjectObj import tkProjectObj
+from .. import tkLogger
+
+try: basestring
+except: basestring = str
+
 
 REPOSITORIES = {
     "default":{}
@@ -58,7 +63,7 @@ class tkProject(tkProjectObj):
             try:
                 mod = importlib.import_module("Toonkit_Core.tkProjects.projects.{0}".format(inName))
             except Exception as e:
-                print (str(e))
+                tkLogger.warning(str(e))
                 pass
 
         else:
@@ -84,6 +89,7 @@ class tkProject(tkProjectObj):
 
         if inName + ".py" in subFiles:
             project = tkProject._get(inName)
+            tkLogger.info(project)
 
         if project is None:
             project = tkProject._get("default")
