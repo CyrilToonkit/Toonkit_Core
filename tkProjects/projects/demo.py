@@ -27,8 +27,8 @@ LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.DEBUG)
 DEBUG = True
 
-from ...tkProjects.tkProject import tkProject
-from ...tkProjects.dbEngines.ShotgunEngine.ShotgunEngine import shotgunEngine
+from ..tkProject import tkProject
+from ..dbEngines.ShotgunEngine.ShotgunEngine import shotgunEngine
 
 REPOSITORIES = {
     "default":{},"tkDeliverIN":{},"tkDeliverOUT":{},"tsuProd":{},"tsuDeliver":{}

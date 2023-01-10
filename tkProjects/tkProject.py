@@ -123,3 +123,57 @@ class tkProject(tkProjectObj):
 
     def getDefaultKeys(self, inEntityType, inTranslate=False):
         return self._engine.getDefaultKeys(inEntityType, inTranslate=inTranslate)
+    
+    def resolveProperies(self):
+        newItems = []
+        for key, projectProp in self._properties.items():
+            if isinstance(projectProp.value, basestring) and projectProp.value.lower().startswith("path="):
+                path = os.path.join(projectProp.value[5:])
+                newItems.append(self.resolvePathPropertie(key, path))
+
+        for key, value in newItems:
+            self._properties[key].value = value 
+        
+        return self._properties
+    
+    def resolvePathPropertie(self, name, path):
+        if os.path.isfile(path):
+            if path.endswith(".py"):
+                try:
+                    with open(path, "r") as f:
+                        data = eval(f.read())
+                    return name, data
+                except:
+                    tkLogger.warning("Error: Unable to read file {0} at path :\n{1}".format(path.split("\\")[-1], path))
+                    return  name, None
+        elif os.path.isdir(path):
+            files = os.listdir(path)
+            datas = {}
+            for file in files:
+                if file.endswith(".py"):
+                    try:
+                        with open(path +"\\" + file, "r") as f:
+                            data = eval(f.read())
+                        datas[".".join(file.split(".")[:-1])] = data
+                    except:
+                        tkLogger.warning("Error: Unable to read file {0} at path :\n{1}".format(file, path))
+                        datas[".".join(file.split(".")[:-1])] = None
+            if not data == {}:
+                return name, data
+            else:
+                return name, None
+        else:
+            return name, None
+
+    def getPropertie(self, inPropertie, inContext=None):
+        if inContext is None:
+            return self._properties[inPropertie].value
+        else:
+            path = self.pipeline.getPattern(inPropertie, inContext)
+            key, value = self.resolvePathPropertie(inPropertie, path)
+            self._properties[key].value = value
+            return self._properties[inPropertie].value
+
+    def setPropertie(self, inPropertie, value):
+        self._properties[inPropertie].value = value
+        return self._properties[inPropertie]

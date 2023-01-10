@@ -62,6 +62,12 @@ class tkProjectObj(object):
             if translatedKey == "name":
                 self.name=value
 
+    def __getitem__(self, value):
+        if value in self._properties.keys():
+            return self._properties[value].value
+        else:
+            raise KeyError (str(value))
+            
     def __getattr__(self, name):
         if name in self.__dict__:
             return self.__dict__["name"]
@@ -157,6 +163,15 @@ class tkProjectObj(object):
         return getattr(mod, "tk" + inName)
 
     def get(self, inEntityType, *args, **kwargs):
+
+        if isinstance(inEntityType, (list, tuple)):
+            values = []
+            for val in values:
+                if inEntityType in self._properties.keys():
+                    values.append(self._properties[val].value)
+            return values
+        if inEntityType in self._properties.keys():
+            return self._properties[inEntityType].value
 
         limit = 0
 
