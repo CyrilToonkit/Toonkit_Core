@@ -43,7 +43,7 @@ from .tkToolOptions.ToonkitCore import ToonkitCore
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 TOOL = None
-
+PROJECT = None
 VERBOSE_ARGNAME = "inVerbose"
 LOGGER_ARGNAME = "inLogger"
 
@@ -173,13 +173,15 @@ def getTool():
     return TOOL
 
 def getProject(inName=None):
+    global PROJECT
     """Get a project object (current one if no name given)
     
     Note : includes a late import of "tkProject" because we have circular dependencies 
     """
     from .tkProjects.tkProject import tkProject
-
-    return tkProject.getClass(inName or getTool().options["project"])()
+    if not PROJECT:
+        PROJECT =  tkProject.getClass(inName or getTool().options["project"])()
+    return PROJECT
 
 def getProjects():
     return ["demo"]
