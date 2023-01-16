@@ -222,9 +222,8 @@ def regroupKnownChunks(inSplit):
 
     return splitPathRegrouped
 
-def match(inPattern, inString, inVariables=None):
+def match(inPattern, inString, inVariables=None, overwrite=True):
     variables = re.findall(RE_VARIABLES, inPattern)
-
     if len(variables) > 0:
         if inVariables == None:
             inVariables = {}
@@ -248,7 +247,6 @@ def match(inPattern, inString, inVariables=None):
 
         curReg = re.compile(pattern.replace('\\', r'\\'), re.IGNORECASE)
 
-
         matchObj = re.search(curReg, inString)
 
         if not matchObj:
@@ -260,7 +258,10 @@ def match(inPattern, inString, inVariables=None):
         for i in range(len(variables)):
             variable = variables[i]
             variableName, variableReg = splitReVariable(variable)
-            inVariables[variableName] = groups[i]
+            if not variableName in inVariables.keys():
+                inVariables[variableName] = groups[i]
+            elif overwrite:
+                inVariables[variableName] = groups[i]
 
         return True
 
