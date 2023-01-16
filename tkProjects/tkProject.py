@@ -23,6 +23,7 @@
 __author__ = "Cyril GIBAUD - Toonkit"
 
 import os
+import re
 import sys
 from imp import reload
 
@@ -73,7 +74,6 @@ class tkProject(tkProjectObj):
             return None 
 
         reload(mod)
-
         toolClass = getattr(mod, inName)
 
         return toolClass
@@ -92,6 +92,7 @@ class tkProject(tkProjectObj):
             tkLogger.info(project)
 
         if project is None:
+            tkLogger.warning("No project given or found, default used !")
             project = tkProject._get("default")
 
         if project is None and len(subFiles) > 0:
@@ -124,15 +125,17 @@ class tkProject(tkProjectObj):
     def getDefaultKeys(self, inEntityType, inTranslate=False):
         return self._engine.getDefaultKeys(inEntityType, inTranslate=inTranslate)
     
-    def resolveProperies(self):
+    def resolveProperies(self, recurtionDeph=3):
         newItems = []
-        for key, projectProp in self._properties.items():
-            if isinstance(projectProp.value, basestring) and projectProp.value.lower().startswith("path="):
-                path = os.path.join(projectProp.value[5:])
-                newItems.append(self.resolvePathPropertie(key, path))
+        while recurtionDeph != 0:
+            for key, projectProp in self._properties.items():
+                if isinstance(projectProp.value, basestring) and projectProp.value.lower().startswith("path="):
+                    path = os.path.join(projectProp.value[5:])
+                    newItems.append(self.resolvePathPropertie(key, path))
 
-        for key, value in newItems:
-            self._properties[key].value = value 
+            for key, value in newItems:
+                self._properties[key].value = value 
+            recurtionDeph -= 1
         
         return self._properties
     
@@ -140,8 +143,7 @@ class tkProject(tkProjectObj):
         if os.path.isfile(path):
             if path.endswith(".py"):
                 try:
-                    with open(path, "r") as f:
-                        data = eval(f.read())
+                    data = self._resolveVarInData(path)
                     return name, data
                 except:
                     tkLogger.warning("Error: Unable to read file {0} at path :\n{1}".format(path.split("\\")[-1], path))
@@ -153,7 +155,7 @@ class tkProject(tkProjectObj):
                 if file.endswith(".py"):
                     try:
                         with open(path +"\\" + file, "r") as f:
-                            data = eval(f.read())
+                            data = self._resolveVarInData(path)
                         datas[".".join(file.split(".")[:-1])] = data
                     except:
                         tkLogger.warning("Error: Unable to read file {0} at path :\n{1}".format(file, path))
@@ -164,6 +166,31 @@ class tkProject(tkProjectObj):
                 return name, None
         else:
             return name, None
+
+    def _resolveVarInData(self, inPath):
+        try:
+            with open(inPath, "r") as f:
+                data = f.read()
+            varInStr = re.findall("self.[A-z]+", data)
+            isTranslated = False
+            if varInStr != []:
+                for matching in varInStr:
+                    value = eval(matching)
+                    if isinstance(value, basestring) and value.startswith("path="):
+                        isTranslated = False
+                        break
+                    else: isTranslated = True
+                if isTranslated == True:
+                    data = eval(data)
+                else:
+                    data = "path=" + inPath
+            else:
+                data = eval(data)
+            return data
+        except Exception as e:
+            tkLogger.error("Error: Unable to read file {0} at path :\n{1}".format(inPath.split("\\")[-1], inPath))
+            tkLogger.error(e)
+            return None
 
     def getPropertie(self, inPropertie, inContext=None):
         if inContext is None:

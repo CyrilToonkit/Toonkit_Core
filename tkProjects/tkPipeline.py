@@ -44,14 +44,12 @@ pipe.addPattern("ShotPath", r"{ProjectPath}\FILM\{ShotLongName}\{ShotFile}")
 
 print pipe.getPattern("ShotPath")
 """
-
-import logging
-logging.basicConfig()
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.DEBUG)
+import os
+from .. import tkLogger
 
 from . import tkContext
 from .tkProjectData import tkProjectData
+from .tkProject import tkContext as ctx
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -83,7 +81,7 @@ class tkPipeline(object):
 
         recursions = 20
         while(len(intersections) > 0):
-            LOGGER.debug("{0} intersections ({1})".format(len(intersections), intersections))
+            tkLogger.debug("{0} intersections ({1})".format(len(intersections), intersections))
 
             thisDict = {key:self._patterns[key].get(dic) for key in intersections}
 
@@ -98,3 +96,23 @@ class tkPipeline(object):
             return tkContext.expandVariables(rawValue, dic)
 
         return rawValue
+    
+    def detectContext(self, path, pattern=None):
+        variables = self.context.copy()
+        if pattern:
+            ctx.match(pattern, path, variables, False)
+            return variables
+        else:
+            for value in self._patterns.values():
+                if value._value:
+                    try:
+                        ctx.match(value._value, path, variables, False)
+                    except UnboundLocalError as e:
+                        tkLogger.info(e)
+                if not value._overrides == []:
+                    try:
+                        ctx.match(value._overrides[0][1], path, variables, False)
+                    except UnboundLocalError as e:
+                        tkLogger.info(e)
+                    variables.update(value._overrides[0][0])
+            return variables
