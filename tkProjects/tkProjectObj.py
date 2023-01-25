@@ -44,6 +44,7 @@ class tkProjectObj(object):
         "parent",
         "engine",
         "pipeline",
+        "dcc"
         ]
 
     def __init__(self, inEngine=dbEngine(), inType=None, inParent=None, *args, **kwargs):
@@ -70,7 +71,7 @@ class tkProjectObj(object):
             
     def __getattr__(self, name):
         if name in self.__dict__:
-            return self.__dict__["name"]
+            return self.__dict__[name]
 
         tkLogger.debug("__getattr__ {0} ({1})".format(name, self))
 

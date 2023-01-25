@@ -24,9 +24,13 @@
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
+from .tkProjects.tkProject import tkProject
+import importlib
 import inspect
 import logging
 import six
+import sys
+import os
 basestring = six.string_types
 logging.basicConfig()
 
@@ -172,7 +176,7 @@ def getTool():
 
     return TOOL
 
-def getProject(inName=None):
+def getProject(dccName="Dcc", inName=None):
     global PROJECT
     """Get a project object (current one if no name given)
     
@@ -180,8 +184,29 @@ def getProject(inName=None):
     """
     from .tkProjects.tkProject import tkProject
     if not PROJECT:
-        PROJECT =  tkProject.getClass(inName or getTool().options["project"])()
+        dcc = getDcc(dccName)
+        PROJECT =  tkProject.getClass(inName or getTool().options["project"])(inDCC = dcc)
     return PROJECT
 
 def getProjects():
     return ["demo"]
+
+def getDcc(dccName):
+    dccMod = None
+    if sys.version_info >= (2,7):
+        import importlib
+        try:
+            dccMod = importlib.import_module("{0}Geter".format(dccName))
+        except Exception as e:
+            logging.warning(str(e))
+            dccMod = importlib.import_module("Toonkit_Core.DccGeter")
+            dccName = "Dcc"
+    else:
+        try:
+            dccMod = __import__("{0}Geter".format(dccName))
+        except Exception as e:
+            logging.warning(str(e))
+            dccMod = __import__("DccGeter")
+            dccName = "Dcc"
+
+    return getattr(dccMod, dccName + "Geter")

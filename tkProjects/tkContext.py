@@ -60,7 +60,7 @@
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 import os
 import re
-
+from .. import tkLogger
 __author__ = "Cyril GIBAUD - Toonkit"
 
 DRIVE_SEP = u":"
@@ -222,8 +222,11 @@ def regroupKnownChunks(inSplit):
 
     return splitPathRegrouped
 
-def match(inPattern, inString, inVariables=None, overwrite=True):
+def match(inPattern, inString, inVariables=None):
+    inPattern = expandVariables(inPattern, inVariables)
     variables = re.findall(RE_VARIABLES, inPattern)
+
+
     if len(variables) > 0:
         if inVariables == None:
             inVariables = {}
@@ -241,12 +244,12 @@ def match(inPattern, inString, inVariables=None, overwrite=True):
                     variableReg = variableReg.replace("<"+index+">", "")
 
             if "\\" in variableReg:
-                print ("WARNING : Please don't use escaped characters in variables regular expressions !")
+                tkLogger.warning ("Please don't use escaped characters in variables regular expressions !")
 
             pattern = pattern.replace(variable, "("+variableReg+")")
 
         curReg = re.compile(pattern.replace('\\', r'\\'), re.IGNORECASE)
-
+        tkLogger.info("expression : {0}, path: {1}".format(pattern, inString))
         matchObj = re.search(curReg, inString)
 
         if not matchObj:
@@ -258,13 +261,12 @@ def match(inPattern, inString, inVariables=None, overwrite=True):
         for i in range(len(variables)):
             variable = variables[i]
             variableName, variableReg = splitReVariable(variable)
-            if not variableName in inVariables.keys():
-                inVariables[variableName] = groups[i]
-            elif overwrite:
-                inVariables[variableName] = groups[i]
+            inVariables[variableName] = groups[i]
 
         return True
-
+    else:
+        tkLogger.warning("No variables found in pattern \"{0}\" !".format(inPattern))
+        pattern = inPattern
     curReg = re.compile(pattern.replace('\\', r'\\'), re.IGNORECASE)
 
     return not re.search(curReg, inString) is None
@@ -347,8 +349,7 @@ def resolvePath(inPath, inVariables=None, inAcceptUndefinedResults=False, inVerb
 #Beware, only works with "{}" variables enclosures, because it relies on str.format()...
 #todo "Create" mode ?
 def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, inFiles=True, inFolders=True, inAcceptUndefinedResults=False, inVerbose=False):
-    if inVerbose:
-        print ("! collectPath called (inPath={0}, inVariables={1}, inMaxResults={2},inRootExists={3},inFiles={4},inFolders={5},inAcceptUndefinedResults={6})".format(inPath, inVariables,inMaxResults,inRootExists,inFiles,inFolders,inAcceptUndefinedResults))
+    tkLogger.info("! collectPath called (inPath={0}, inVariables={1}, inMaxResults={2},inRootExists={3},inFiles={4},inFolders={5},inAcceptUndefinedResults={6})".format(inPath, inVariables,inMaxResults,inRootExists,inFiles,inFolders,inAcceptUndefinedResults))
 
     #Todo maybe we can be smart on the way we want to confirm existence of root... 
     inRootExists = False
@@ -364,9 +365,8 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
     parseAblePath = expandVariables(inPath, inVariables)
     variables = re.findall(RE_VARIABLES, parseAblePath)
 
-    if inVerbose:
-        print ("parseAblePath",parseAblePath)
-        print ("variables", variables)
+    tkLogger.info(("parseAblePath",parseAblePath))
+    tkLogger.info(("variables", variables))
 
     #Need real parsing
     if len(variables) > 0:
@@ -393,7 +393,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
             confirmedPath = splitPath[0]
             checkings+=1
         elif inVerbose:
-            print ("Path {0} does not exists !".format(splitPath[0]))
+            tkLogger.info("Path {0} does not exists !".format(splitPath[0]))
 
         if confirmedPath != None:
             item = splitPath[1]
@@ -459,8 +459,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
             checkings+=1
             results = [(parseAblePath,inVariables)]
 
-    if inVerbose:
-        print ("! resolvePath performed {0} file checks and {1} directories parsing".format(checkings, parsings))
+    tkLogger.info("! resolvePath performed {0} file checks and {1} directories parsing".format(checkings, parsings))
 
     return results
 

@@ -21,63 +21,8 @@
 """
 __author__ = "Mickael GARCIA - Toonkit"
 
-from ... import tkLogger
+from .base import base
 
-from ..tkProject import tkProject
-from ..tkPipeline import tkPipeline
-from .. import tkContext as ctx
-import tkMayaCore as tkc
-import os
-
-class default(tkProject):
+class default(base):
     def __init__(self, *args, **kwargs):
         super(default, self).__init__(*args, **kwargs)
-
-        self.modulePath = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir))
-        self.name = self.getProject()
-        
-        self.pipeline.addPattern("IOProject", ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}", {"projectName":self.name}))
-        self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
-        self.pipeline.addPattern("releasePatern", r"{IOProject}\DELIVERY\{assetType}\{name:.+}\{name:.+}_{lodTag}_v{version:[0-9]{3}<-1>}.ma")
-        self.pipeline.addPattern("assetPatern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}.ma")
-        self.pipeline.addPattern("deltaFolder", r"{IOProject}\Interne\DELTAS")
-        self.pipeline.addPattern("scriptFolder", r"{OSCARProject}\Scripts")
-        self.pipeline.addPattern("template", self.modulePath + r"\templates")
-        self.pipeline.addPattern("AngleListener", r'{template}\AngleListener\{templateName}.py')
-        self.pipeline.addPattern("ShadowRig", r'{template}\ShadowRig\{templateName}.py')
-        self.pipeline.addPattern("RotationOrder", r"{template}\RotationOrder\{templateName}.py")
-        self.pipeline.addPattern("PickWalk", r"{template}\PickWalk\{templateName}.py")
-        self.pipeline.addPattern("conform", r"{scriptFolder}\Conform{projectName}.py")
-
-        self.pipeline.context = {"projectName": self.name}
-
-        # RawPath
-        self.releasePatern = self.pipeline.getPattern("releasePatern")
-        self.localAssetPatern = self.pipeline.getPattern("assetPatern")
-        self.deltaFolder = self.pipeline.getPattern("deltaFolder")
-        self.scriptFolder = self.pipeline.getPattern("scriptFolder")
-        self.conformPath = self.pipeline.getPattern("conform")
-
-        # PathProperties
-        self.AngleListener = r"path={0}".format(self.pipeline.getPattern("AngleListener", {"templateName":"AngleListener"}))
-        self.ShadowRig = r"path={0}".format(self.pipeline.getPattern("ShadowRig", {"templateName":"ShadowRig"}))
-        self.RotationOrder = r"path={0}".format(self.pipeline.getPattern("RotationOrder", {"templateName":"RotationOrder"}))
-        self.PickWalk = r"path={0}".format(self.pipeline.getPattern("PickWalk", {"templateName":"PickWalk"}))
-        
-        self.resolveProperies()
-
-        # Contantes
-        self.root= (["Z:", "Q:"])
-        self.ctrlSetName = "*_anim_set"
-        self.geoSetName = "*_geo_selset"
-        self.hideSuffix = ["_PRO", "_PXY"]
-        self.templatesSpecs = [
-            ("Global_SRT", "props"),
-            ("Left_Arm_ParamHolder", "char"),
-            ("left_RearLeg_ParamHolder", "char")
-        ]
-
-        self.rigGrp = "rig_grp"
-
-    def getProject(self):
-        return tkc.TOOL.options["project"]

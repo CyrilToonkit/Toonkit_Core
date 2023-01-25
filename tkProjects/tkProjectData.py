@@ -44,6 +44,3 @@ class tkProjectData(object):
                     return overrideValue
 
         return self._value
-
-
-

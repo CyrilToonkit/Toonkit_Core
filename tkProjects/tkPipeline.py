@@ -58,6 +58,7 @@ class tkPipeline(object):
         super(tkPipeline, self).__init__()
 
         self.context = {}
+        self.baseContext = None
 
         self._constants = {}
         self._patterns = {}
@@ -97,22 +98,37 @@ class tkPipeline(object):
 
         return rawValue
     
-    def detectContext(self, path, pattern=None):
-        variables = self.context.copy()
-        if pattern:
-            ctx.match(pattern, path, variables, False)
-            return variables
-        else:
-            for value in self._patterns.values():
+    def detectContext(self, path, pattern = None, variables={}):
+        if variables == {}:
+            if self.baseContext != None:
+                variables = self.baseContext.copy()
+            else:
+                variables = {}
+
+        if pattern and ctx.match(pattern, path, variables):
+            return pattern
+        elif not pattern:
+            for value in self.getLeavesPattern():
                 if value._value:
-                    try:
-                        ctx.match(value._value, path, variables, False)
-                    except UnboundLocalError as e:
-                        tkLogger.info(e)
+                    if ctx.match(value._value, path, variables):
+                        tkLogger.info("Matching Pattern : " + value._value)
+                        return value._value
                 if not value._overrides == []:
-                    try:
-                        ctx.match(value._overrides[0][1], path, variables, False)
-                    except UnboundLocalError as e:
-                        tkLogger.info(e)
-                    variables.update(value._overrides[0][0])
-            return variables
+                    for overides in value._overrides:
+                        if ctx.match(overides[1], path, variables):
+                            tkLogger.info("Matching Override Pattern : " + overides[1])
+                            variables.update(overides[0])
+                            return value._value
+        else:
+            return None
+    
+    def getLeavesPattern(self):
+        variables = []
+        for value in self._patterns.values():
+            variables.extend([x[1:-1] for x in ctx.getVariables(value._value)])
+        leavesPattern = []
+        for key, value in self._patterns.items():
+            if not key in variables:
+                leavesPattern.append(value)
+        return leavesPattern
+    

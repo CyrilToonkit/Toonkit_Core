@@ -51,8 +51,11 @@ class base(tkProject):
         self.pipeline.addPattern("RotationOrder", r"{template}\RotationOrder\{templateName}.py")
         self.pipeline.addPattern("PickWalk", r"{template}\PickWalk\{templateName}.py")
         self.pipeline.addPattern("conform", r"{scriptFolder}\Conform{projectName}.py")
-        self.setOverwrite(("Z:", "Q:"))
+        self.setOverwrite([("Z:", "Q:")])
         self.pipeline.context = {"projectName": self.name, "repo":"local"}
+        self.baseContextKeys = ["projectName"]
+        self.pipeline.baseContext = {key:value for (key, value) in self.pipeline.context.items() if key in self.baseContextKeys}
+        
 
         # RawPath
         self.localAssetPatern = self.pipeline.getPattern("assetPatern")
@@ -62,9 +65,9 @@ class base(tkProject):
 
         # PathProperties
         self.AngleListener = r"path={0}\templates\AngleListener\AngleListener.py".format(self.modulePath)
-        self.ShadowRig = r"path={0}".format(self.pipeline.getPattern("ShadowRig", {"templateName":"ShadowRig"}))
-        self.RotationOrder = r"path={0}".format(self.pipeline.getPattern("RotationOrder", {"templateName":"RotationOrder"}))
-        self.PickWalk = r"path={0}".format(self.pipeline.getPattern("PickWalk", {"templateName":"PickWalk"}))
+        self.ShadowRig = r"path={0}\templates\ShadowRig\ShadowRig.py".format(self.modulePath)
+        self.RotationOrder = r"path={0}\templates\RotationOrder\RotationOrder.py".format(self.modulePath)
+        self.PickWalk = r"path={0}\templates\PickWalk\PickWalk.py".format(self.modulePath)
         
         self.resolveProperies()
 
@@ -74,11 +77,12 @@ class base(tkProject):
         self.geoSetName = "*_geo_selset"
         self.modNamespace = "MOD"
         self.hideSuffix = ["_PRO", "_PXY"]
-        self.templatesSpecs = [
-            ("Global_SRT", "props"),
-            ("Left_Arm_ParamHolder", "char"),
-            ("left_RearLeg_ParamHolder", "char")
-        ]
+        self.templatesSpecs = {"Biped":[("Left_Leg_ParamHolder*", 0.75), ("Right_Leg_ParamHolder*", 0.75), ("Left_Arm_ParamHolder*", 0.75), ("Right_Arm_ParamHolder*", 0.75)],
+                               "Quadriped": [("Left_Foreleg_ParamHolder*", 0.75), ("Left_Foreleg_ParamHolder*", 0.75), ("Left_RearLeg_ParamHolder*", 0.75), ("Right_RearLeg_ParamHolder*", 0.75)],
+                               "Bird": [("*Wing*", 1.5), ("*Feather*", 1)],# Feather is usless in my point of view
+                               "Vehicule": [({"type":"tkWheel"}, 1), ("Undercarriage*", 1)],
+                               "Props": [("Global_SRT", 1)]}
+
         self.excludeTags = [
             ".+_geocns.*",
             ".+_GeoCns.*",
@@ -105,6 +109,30 @@ class base(tkProject):
 
     def setOverwrite(self, inRoots):
         for key, value in self.pipeline._patterns.items():
-            if value._value.startswith(inRoots[0]):
-                projData = self.pipeline._patterns[key]
-                projData._overrides.append(({"repo": "server"}, projData._value.replace(inRoots[0], inRoots[1])))
+            for inRoot, outRoot in inRoots:
+                if value._value.startswith(inRoot):
+                    projData = self.pipeline._patterns[key]
+                    projData._overrides.append(({"repo": "server"}, projData._value.replace(inRoot, outRoot)))
+                    break
+    
+    def detectContext(self, path, pattern=None):
+        context = self.pipeline.context.copy()
+        machedPattern = self.pipeline.detectContext(path, pattern, variables=context)
+        if machedPattern:
+            context.update(self.getPropertie("dcc").detect_template(self.getPropertie("templatesSpecs")))
+            self.lodData, self.variationData = self["dcc"].get_lod_var(self.getPropertie("lodTags"), context)
+            if "AN" in machedPattern:
+                self.getVersion(self.pipeline.getPattern("releasePatern"), context)
+        return context
+
+    def getVersion(self, pattern, variables):
+        tmpVersion = []
+        if "version" in variables.keys():
+            del(variables["version"])
+        if not (ctx.resolvePath(pattern, variables)is None):
+            tmpVersion.append(int(variables["version"]))
+            del(variables["version"])
+        if len(tmpVersion) >0 :
+            variables["version"] = (max(tmpVersion))
+        else:
+            variables["version"] = 0

@@ -48,13 +48,14 @@ default =  {
 REPOSITORIES["default"] = default
 
 class tkProject(tkProjectObj):
-    def __init__(self, inEngine=dbEngine(), inType="Project", *args, **kwargs):
+    def __init__(self, inEngine=dbEngine(), inDCC=None, inType="Project", *args, **kwargs):
         super(tkProject, self).__init__(inEngine, inType=inType, inParent=None, *args, **kwargs)
 
         self.name="tkProject"
         self.pipeline = tkpipe.tkPipeline()
         self._engine = inEngine
-
+        self.dcc = inDCC
+            
     @staticmethod
     def _get(inName):
         mod = None
