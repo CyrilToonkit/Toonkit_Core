@@ -24,7 +24,6 @@
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
-from .tkProjects.tkProject import tkProject
 import importlib
 import inspect
 import logging
@@ -34,7 +33,6 @@ import os
 basestring = six.string_types
 logging.basicConfig()
 
-#from tkToolOptions.ToonkitCore import ToonkitCore
 from .tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -185,7 +183,7 @@ def getProject(dccName="Dcc", inName=None):
     from .tkProjects.tkProject import tkProject
     if not PROJECT:
         dcc = getDcc(dccName)
-        PROJECT =  tkProject.getClass(inName or getTool().options["project"])(inDCC = dcc)
+        PROJECT =  tkProject.getClass(inName or getTool().options["project"])(inDCC = dcc())
     return PROJECT
 
 def getProjects():

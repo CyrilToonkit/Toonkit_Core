@@ -27,9 +27,10 @@ import re
 import sys
 from imp import reload
 
-from . import tkContext
+from . import tkContext as ctx
 from . import tkPipeline as tkpipe
 from .dbEngines.dbEngine import dbEngine
+
 from .tkProjectObj import tkProjectObj
 from .. import tkLogger
 
@@ -55,7 +56,31 @@ class tkProject(tkProjectObj):
         self.pipeline = tkpipe.tkPipeline()
         self._engine = inEngine
         self.dcc = inDCC
-            
+
+    def __getattr__(self, inName):
+        if inName in tkProjectObj.PROTECTEDMEMBERS:
+            return tkProjectObj.__getattr__(self, inName)
+        if "pipeline" in self.__dict__:
+            if inName in self.pipeline._constants:
+                return self.pipeline._constants[inName].get(self.pipeline.context)
+            if inName in self.pipeline._patterns:
+                return self.pipeline.getPattern(inName)
+        
+        return tkProjectObj.__getattr__(self, inName)
+    
+    def __setattr__(self, inName, value):
+        if inName in tkProjectObj.PROTECTEDMEMBERS:
+            return tkProjectObj.__setattr__(self, inName, value)
+        if "pipeline" in self.__dict__:
+            if inName in self.pipeline._constants:
+                self.pipeline._constants[inName]._value = value
+                return
+            elif inName in self.pipeline._patterns:
+                self.pipeline._patterns[inName]._value = value
+                return
+        else:
+            tkProjectObj.__setattr__(self,inName, value)
+
     @staticmethod
     def _get(inName):
         mod = None
@@ -126,16 +151,19 @@ class tkProject(tkProjectObj):
     def getDefaultKeys(self, inEntityType, inTranslate=False):
         return self._engine.getDefaultKeys(inEntityType, inTranslate=inTranslate)
     
-    def resolveProperies(self, recurtionDeph=3):
+    def resolveProperties(self, recurtionDeph=3):
         newItems = []
         while recurtionDeph != 0:
-            for key, projectProp in self._properties.items():
-                if isinstance(projectProp.value, basestring) and projectProp.value.lower().startswith("path="):
-                    path = os.path.join(projectProp.value[5:])
+            for key, projectProp in self.pipeline._constants.items():
+                if isinstance(projectProp._value, basestring) and projectProp._value.lower().startswith("path="):
+                    path = os.path.join(projectProp._value[5:])
                     newItems.append(self.resolvePathPropertie(key, path))
+                for nb, (dictKey, override) in enumerate(projectProp._overrides):
+                    if isinstance(override, basestring) and override.lower().startswith("path="):
+                        projectProp._overrides[nb] = (dictKey, self.resolvePathPropertie(key, os.path.join(override[5:]))[1])
 
             for key, value in newItems:
-                self._properties[key].value = value 
+                self.pipeline._constants[key]._value = value
             recurtionDeph -= 1
         
         return self._properties
@@ -194,14 +222,27 @@ class tkProject(tkProjectObj):
             return None
 
     def getPropertie(self, inPropertie, inContext=None):
-        if inContext is None:
+        if inPropertie in self.pipeline._patterns:
+            return self.pipeline.getPattern(inPropertie, inContext)
+        elif inPropertie in self.pipeline._constants:
+            return self.pipeline._constants[inPropertie].get(inContext)
+        elif inPropertie in self._properties:
             return self._properties[inPropertie].value
         else:
-            path = self.pipeline.getPattern(inPropertie, inContext)
-            key, value = self.resolvePathPropertie(inPropertie, path)
-            self._properties[key].value = value
-            return self._properties[inPropertie].value
+            return None
 
-    def setPropertie(self, inPropertie, value):
-        self._properties[inPropertie].value = value
-        return self._properties[inPropertie]
+    def detectContext(self, path, pattern=None, inForceResolve=False):
+        context = self.pipeline.baseContext.copy()
+        detectedContext = self.pipeline.detectContext(path, pattern, variables=context)
+
+        if detectedContext and ctx.match(self.pipeline.getPattern(detectedContext[1], context), path):
+            machedPattern = detectedContext[0]
+            unresolved = ctx.getVariables(machedPattern, True)
+            if not unresolved == [] or inForceResolve:
+                tkLogger.info("Pattern unresolved or inForceResolve option is True !")
+                dccBasedContext = self.dcc.detect_context(unresolved, machedPattern, context)
+                context.update(dccBasedContext)
+        else:
+            tkLogger.error("Could not find matching pattern of this asset in the current project !")
+            return None
+        return context

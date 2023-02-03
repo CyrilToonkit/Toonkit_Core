@@ -33,7 +33,6 @@ class tkProjectData(object):
 
     def get(self, inDict=None):
         if not inDict is None and len(inDict) > 0:
-            
             for overrideDict, overrideValue in self._overrides:
                 matches = True
                 for key, value in overrideDict.items():
@@ -42,5 +41,4 @@ class tkProjectData(object):
                         break
                 if matches:
                     return overrideValue
-
         return self._value

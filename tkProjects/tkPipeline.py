@@ -106,19 +106,31 @@ class tkPipeline(object):
                 variables = {}
 
         if pattern and ctx.match(pattern, path, variables):
-            return pattern
+            return pattern, None
         elif not pattern:
-            for value in self.getLeavesPattern():
+            for key, value in self.getLeavesPattern().items():
                 if value._value:
                     if ctx.match(value._value, path, variables):
+                        toResolved = ctx.getVariables(value._value, True)
+                        for var in toResolved:
+                            if not var in self._patterns:
+                                continue
+                            elif ctx.match(self._patterns[var]._value, path, variables):
+                                continue
+                            elif self._patterns[var]._overrides == []:
+                                continue
+                            else:
+                                for overrideFilters, overridePattern in self._patterns[var]._overrides:
+                                    if ctx.match(overridePattern, path, variables):
+                                        variables.update(overrideFilters)
                         tkLogger.info("Matching Pattern : " + value._value)
-                        return value._value
+                        return value._value, key
                 if not value._overrides == []:
                     for overides in value._overrides:
                         if ctx.match(overides[1], path, variables):
                             tkLogger.info("Matching Override Pattern : " + overides[1])
                             variables.update(overides[0])
-                            return value._value
+                            return value._value, key
         else:
             return None
     
@@ -126,9 +138,9 @@ class tkPipeline(object):
         variables = []
         for value in self._patterns.values():
             variables.extend([x[1:-1] for x in ctx.getVariables(value._value)])
-        leavesPattern = []
+        leavesPattern = {}
         for key, value in self._patterns.items():
             if not key in variables:
-                leavesPattern.append(value)
+                leavesPattern[key] = value
         return leavesPattern
     

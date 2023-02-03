@@ -21,7 +21,7 @@
 """
 
 import logging
-from . import tkFs 
+import os
 
 CRITICAL = 50
 ERROR = 40
@@ -49,7 +49,12 @@ def setLogsFiles(path):
     handlers = tkLogger.handlers
     if len(handlers) == 0:
         logForm = logging.Formatter(fmt='[%(asctime)s, Level:%(levelname)s, Module:%(module)s, Func:%(funcName)s, Ligne:%(lineno)d]:    %(message)s', datefmt='%H:%M:%S')
-        tkFs.makedirs(path)
+        try:
+            os.makedirs(os.path.split(path)[0])
+        except OSError:
+            if not os.path.isdir(os.path.split(path)[0]):
+                raise
+
         fileHandler = logging.FileHandler(path)
         fileHandler.setLevel(tkLogger.level)
         fileHandler.setFormatter(logForm)

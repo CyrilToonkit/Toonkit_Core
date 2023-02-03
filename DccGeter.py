@@ -1,6 +1,10 @@
 from . import tkLogger
 class DccGeter():
 
+    def detect_context():
+        tkLogger.error("Detect context must be overwrite, you must use specific dcc geter !")
+        raise AttributeError
+        
     def detect_template(inTemplatesSpecs, ns=""):
         tkLogger.error("Detect template must be overwrite, you must use specific dcc geter !")
         raise AttributeError
