@@ -49,7 +49,7 @@ from .. import tkLogger
 
 from . import tkContext
 from .tkProjectData import tkProjectData
-from .tkProject import tkContext as ctx
+from . import tkContext as ctx
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
