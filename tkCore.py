@@ -25,6 +25,8 @@
 __author__ = "Cyril GIBAUD - Toonkit"
 
 import inspect
+from functools import partial
+from timeit import timeit
 import logging
 import six
 basestring = six.string_types
@@ -149,6 +151,63 @@ def getFromDefaults(inDict, inKey, inLastDefault, *args):
             return defaultDict[inKey]
 
     return inLastDefault
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  _____         _   _             
+ |_   _|__  ___| |_(_)_ __   __ _ 
+   | |/ _ \/ __| __| | '_ \ / _` |
+   | |  __/\__ \ |_| | | | | (_| |
+   |_|\___||___/\__|_|_| |_|\__, |
+                            |___/ 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+
+def timeThem(*args, **kwargs):
+    """
+    Benchmarks any callable passed in arguments, calling it with the remaining arguments (all functions must all accept these remaining given arguments and named arguments)
+    Takes "inNumber" as an hidden named argument for the number of calls (bigger values, =~100 are more accurate but longer of course...)
+    Example:
+        timeThem(objExists, melObjExists, pmObjExists, apiObjExists, "sphere1", inNumber=10)
+        objExists, melObjExists, pmObjExists and apiObjExists are functions that takes a string and tells if an object exists 
+    Outputs:
+        objExists        : 0.6530 returns 'False' (bool)
+        melObjExists     : 1.0602 ( *1.62) returns '0' (int)
+        pmObjExists      : 1.6226 ( *2.48) returns 'False' (bool)
+        apiObjExists     : 0.7104 ( *1.09) returns 'False' (bool)
+    """
+
+    funcs = []
+    funcArgs = list(args[:])
+    
+    #filter arguments
+    for arg in args:
+        if callable(arg):
+            funcs.append(arg)
+            funcArgs.remove(arg)
+    
+    inNumber=10
+    if key in kwargs:
+        inNumber = kwargs[key]
+        del kwargs[key]
+
+    durations = []
+    refTime = 0.0
+
+    for func in funcs:
+        retVal = func(*funcArgs, **kwargs)
+        duration = timeit(partial(func, *funcArgs, **kwargs), number=inNumber)
+        
+        comparison = ""
+        if refTime <= 0.0:
+            refTime = duration
+        else:
+            comparison = " ( *{:.2f})".format(duration / refTime)
+            
+        print("{: <16} : {:.4f}".format(func.__name__, duration) + comparison + " returns '{}' ({})".format(retVal, type(retVal).__name__))
+        durations.append(duration)
+        
+    return durations
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   _____            _                                      _   
