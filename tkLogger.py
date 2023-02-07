@@ -21,7 +21,7 @@
 """
 
 import logging
-from . import tkFs 
+import os 
 
 CRITICAL = 50
 ERROR = 40
@@ -44,12 +44,26 @@ tkLogger = logging.getLogger("tkLogger")
 if tkLogger.level == 0:
     tkLogger.setLevel("NOTSET")
 
+def makedirs(inPath):
+    """Create directory structure is it does not exists already (can take a file path)"""
+
+    #Manage case where a filename is given
+    dirPath, filePath = os.path.split(inPath)
+    if os.extsep in filePath:
+        inPath = dirPath
+
+    try:
+        os.makedirs(inPath)
+    except OSError:
+        if not os.path.isdir(inPath):
+            raise
+
 # Set logFile for the tkLogger. Create it if it doesn't exist, or return it.
 def setLogsFiles(path):
     handlers = tkLogger.handlers
     if len(handlers) == 0:
         logForm = logging.Formatter(fmt='[%(asctime)s, Level:%(levelname)s, Module:%(module)s, Func:%(funcName)s, Ligne:%(lineno)d]:    %(message)s', datefmt='%H:%M:%S')
-        tkFs.makedirs(path)
+        makedirs(path)
         fileHandler = logging.FileHandler(path)
         fileHandler.setLevel(tkLogger.level)
         fileHandler.setFormatter(logForm)
@@ -69,7 +83,6 @@ def removeHandlers():
     for hdlr in tkLogger.handlers:
         tkLogger.removeHandler(hdlr)
 
-@property
 def level():
     return _levelToName.get(tkLogger.level)
 
