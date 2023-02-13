@@ -175,6 +175,7 @@ def timeThem(*args, **kwargs):
             funcs.append(arg)
             funcArgs.remove(arg)
     
+    key = "inNumber"
     inNumber=10
     if key in kwargs:
         inNumber = kwargs[key]
