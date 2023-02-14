@@ -39,18 +39,17 @@ class base(tkProject):
         self.pipeline.addPattern("IOProject", ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name}))
         if not self.pipeline._patterns["IOProject"]._value:
             raise Exception("Unable to get valide In/Out project folder !")
+        self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
 
         self.pipeline.addPattern("releasePattern", r"{IOProject}\DELIVERY\{assetType}\{name:.+}\{name:.+}_{lodTag}_v{version:[0-9]{3}<-1>}.ma")
         self.pipeline.addPattern("deltaFolder", r"{IOProject}\Interne\DELTAS")
-        self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
         self.pipeline.addPattern("assetAnPattern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}.ma")
         self.pipeline.addPattern("assetRawPattern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}_RAW.ma")
         self.pipeline.addPattern("assetMasterPattern", r"{OSCARProject}\Assets\{name:.+}_MASTER.ma")
         self.pipeline.addPattern("assetMasterRawPattern", r"{OSCARProject}\Assets\{name:.+}_MASTER_RAW.ma")
-        self.pipeline.addPattern("assetRigPattern", r"{OSCARProject}\Assets\{name:.+}.ma")
-        self.pipeline.addPattern("scriptFolder", r"Q:\ToonKit\OSCAR\Projects\Scripts")
+        self.pipeline.addPattern("assetRigPattern", r"{OSCARProject}\Assets\{name:.+}\{name:.+}.ma")
+        self.pipeline.addPattern("scriptFolder", r"{OSCARProject}\Scripts")
         self.pipeline.addPattern("template", self.modulePath + r"\templates")
-        self.pipeline.addPattern("conform", r"{scriptFolder}\Conform{projectName}.py")
         self.setOverwrite([("Z:", "Q:")])
         self.pipeline.context = {"projectName": self.name, "repo":"local"}
         self.pipeline.addConstant("baseContextKeys", ["projectName"])
@@ -58,15 +57,15 @@ class base(tkProject):
         
         # RawPath
         self.pipeline.addConstant("scriptFolder", self.pipeline.getPattern("scriptFolder"))
-        self.pipeline.addConstant("mocapPath", r"Q:\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma")
+        self.pipeline.addConstant("mocapPath", r"Q:\ToonKit\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma")
 
         # PathProperties
         self.pipeline.addConstant("AngleListener", r"path={0}\templates\AngleListener\AngleListener.py".format(self.modulePath))
         self.pipeline.addConstant("ShadowRig", r"path={0}\templates\ShadowRig\ShadowRig.py".format(self.modulePath))
         self.pipeline.addConstant("RotationOrder", r"path={0}\templates\RotationOrder\RotationOrder.py".format(self.modulePath))
-        self.pipeline.addConstant("PickWalk", r"path={0}\templates\PickWalk\PickWalk.py".format(self.modulePath))
+        self.pipeline.addConstant("PickWalk", r"path={0}\templates\RigSpecs\PickWalk.py".format(self.modulePath))
         
-        self.resolveProperties()
+        
 
         # Contantes
         self.pipeline.addConstant("rigGrp", "rig_grp")
@@ -78,7 +77,7 @@ class base(tkProject):
                                "Quadriped": [("Left_Foreleg_ParamHolder*", 0.75), ("Left_Foreleg_ParamHolder*", 0.75), ("Left_RearLeg_ParamHolder*", 0.75), ("Right_RearLeg_ParamHolder*", 0.75)],
                                "Bird": [("*Wing*", 1.5), ("*Feather*", 1)],# Feather is usless in my point of view
                                "Vehicule": [({"type":"tkWheel"}, 1), ("Undercarriage*", 1)],
-                               "Props": [("Global_SR*", 1)]})
+                               "Props": [("Global_SRT", 1), ("GlobalSR*", 1)]})
 
         self.pipeline.addConstant("excludeTags", [
             ".+_geocns.*",
@@ -98,6 +97,22 @@ class base(tkProject):
         self.pipeline.addConstant("forceInfShadowRig", [])
         self.pipeline.addConstant("lodTags", {"LD":"lod2", "MD":"lod1", "HD":"lod0"})
 
+        # RigingKickstarterTamplate, it's for testing purpose. 
+        # To be delete befor commit !
+        self.pipeline.addConstant("mocapPrefix","MayaHIK_")
+        self.pipeline.addConstant("yup_zfront_preset", r"path={0}\templates\Mocap\yup_zfront_preset.py".format(self.modulePath))
+        self.pipeline.addConstant("mocapDefinition", r"path={0}\templates\Mocap\mocapDefinition.py".format(self.modulePath))
+        self.pipeline.addConstant("mocapBinding", r"path={0}\templates\Mocap\tamplate.py".format(self.modulePath))
+        self.pipeline.addConstant("mocapOrient", r"path={0}\templates\Mocap\presets.py".format(self.modulePath))
+        self.pipeline.addConstant("mocapSkeletonPath", r"Q:\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma".format(self.modulePath))
+
+        self.pipeline.addConstant("shadowrigOrients", r"path={0}\templates\ShadowRig\shadowrig_orients.py".format(self.modulePath))
+        self.pipeline.addConstant("shadowrigPreset", r"path={0}\templates\ShadowRig\shadowrig_preset.py".format(self.modulePath))
+        self.pipeline.addConstant("shadowrigRenamings", r"path={0}\templates\ShadowRig\shadowrig_renamings.py".format(self.modulePath))
+        self.pipeline.addConstant("shadowrigRotateorders", r"path={0}\templates\ShadowRig\shadowrig_rotateorders.py".format(self.modulePath))
+        self.pipeline.addConstant("rigOrients", r"path={0}\templates\RigSpecs\rigOrients.py".format(self.modulePath))
+
+        self.resolveProperties()
     def getProject(self):
         return tkc.TOOL.options["project"]
 

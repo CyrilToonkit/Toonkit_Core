@@ -61,6 +61,7 @@
 import os
 import re
 from .. import tkLogger
+
 __author__ = "Cyril GIBAUD - Toonkit"
 
 DRIVE_SEP = u":"

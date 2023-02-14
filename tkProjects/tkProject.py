@@ -151,73 +151,58 @@ class tkProject(tkProjectObj):
     def getDefaultKeys(self, inEntityType, inTranslate=False):
         return self._engine.getDefaultKeys(inEntityType, inTranslate=inTranslate)
     
-    def resolveProperties(self, recurtionDeph=3):
+    def resolveProperties(self):
         newItems = []
-        while recurtionDeph != 0:
-            for key, projectProp in self.pipeline._constants.items():
-                if isinstance(projectProp._value, basestring) and projectProp._value.lower().startswith("path="):
-                    path = os.path.join(projectProp._value[5:])
-                    newItems.append(self.resolvePathPropertie(key, path))
-                for nb, (dictKey, override) in enumerate(projectProp._overrides):
-                    if isinstance(override, basestring) and override.lower().startswith("path="):
-                        projectProp._overrides[nb] = (dictKey, self.resolvePathPropertie(key, os.path.join(override[5:]))[1])
+        for key, projectProp in self.pipeline._constants.items():
+            if isinstance(projectProp._value, basestring) and projectProp._value.lower().startswith("path="):
+                path = os.path.join(projectProp._value[5:])
+                newItems.append(self.resolvePathPropertie(key, path))
+            for nb, (dictKey, override) in enumerate(projectProp._overrides):
+                if isinstance(override, basestring) and override.lower().startswith("path="):
+                    projectProp._overrides[nb] = (dictKey, self.resolvePathPropertie(key, os.path.join(override[5:]))[1])
 
             for key, value in newItems:
                 self.pipeline._constants[key]._value = value
-            recurtionDeph -= 1
         
         return self._properties
     
     def resolvePathPropertie(self, name, path):
         if os.path.isfile(path):
             if path.endswith(".py"):
-                try:
-                    data = self._resolveVarInData(path)
-                    return name, data
-                except:
-                    tkLogger.warning("Error: Unable to read file {0} at path :\n{1}".format(path.split("\\")[-1], path))
-                    return  name, None
+                data = self._resolveVarInData(path)
+                return name, data
         elif os.path.isdir(path):
             files = os.listdir(path)
             datas = {}
             for file in files:
                 if file.endswith(".py"):
-                    try:
-                        with open(path +"\\" + file, "r") as f:
-                            data = self._resolveVarInData(path)
-                        datas[".".join(file.split(".")[:-1])] = data
-                    except:
-                        tkLogger.warning("Error: Unable to read file {0} at path :\n{1}".format(file, path))
-                        datas[".".join(file.split(".")[:-1])] = None
+                    data = self._resolveVarInData(path)
+                    datas[".".join(file.split(".")[:-1])] = data
             if not data == {}:
-                return name, data
-            else:
-                return name, None
-        else:
-            return name, None
+                return name, datas
+        return name, None
 
     def _resolveVarInData(self, inPath):
         try:
             with open(inPath, "r") as f:
                 data = f.read()
-            varInStr = re.findall("self.[A-z]+", data)
-            isTranslated = False
-            if varInStr != []:
-                for matching in varInStr:
-                    value = eval(matching)
-                    if isinstance(value, basestring) and value.startswith("path="):
-                        isTranslated = False
-                        break
-                    else: isTranslated = True
-                if isTranslated == True:
-                    data = eval(data)
-                else:
-                    data = "path=" + inPath
-            else:
+            try:
+                foundVars = re.findall("self.[A-z0-9]+", data)
+                for foundVar in foundVars:
+                    trueVar = eval(foundVar)
+                    tkLogger.debug("FoundVraible in properties: {} => {}".format(foundVar, trueVar))
+                    if isinstance(trueVar, basestring) and trueVar.startswith("path="):
+                        varName, varData = self.resolvePathPropertie(foundVar.replace("self.", ""), trueVar[5:])
+                        self.pipeline._constants[varName]._value = varData
+                        tkLogger.debug("ResolvedValue = {}".format(eval(foundVar)))
                 data = eval(data)
+            except Exception as e:
+                tkLogger.warning("Unable to eval data {}, can't resolve variable inside file.".format(inPath.split("\\")[-1]))
+                tkLogger.warning(e)
+                data = "path=" + inPath
             return data
         except Exception as e:
-            tkLogger.error("Error: Unable to read file {0} at path :\n{1}".format(inPath.split("\\")[-1], inPath))
+            tkLogger.error("Unable to read file {0} at path :\n{1}".format(inPath.split("\\")[-1], inPath))
             tkLogger.error(e)
             return None
 
@@ -231,18 +216,36 @@ class tkProject(tkProjectObj):
         else:
             return None
 
-    def detectContext(self, path, pattern=None, inForceResolve=False):
+    def detectContext(self, path=None, pattern=None, inUpdateContext=False, inForceResolve=False):
         context = self.pipeline.baseContext.copy()
-        detectedContext = self.pipeline.detectContext(path, pattern, variables=context)
-
-        if detectedContext and ctx.match(self.pipeline.getPattern(detectedContext[1], context), path):
-            machedPattern = detectedContext[0]
-            unresolved = ctx.getVariables(machedPattern, True)
-            if not unresolved == [] or inForceResolve:
-                tkLogger.info("Pattern unresolved or inForceResolve option is True !")
-                dccBasedContext = self.dcc.detect_context(unresolved, machedPattern, context)
-                context.update(dccBasedContext)
+        patternName = None
+        if path == None:
+            path = self.dcc.getSceneName()
+        if not path is None:
+            detectedContext = self.pipeline.detectContext(path, pattern, variables=context)
+            pattern = detectedContext[0]
+            patternName = detectedContext[1]
+        elif pattern is None:
+            tkLogger.error("Could not find matching pattern of this asset in the current project !")
+            return None
+        elif path is None:
+            unresolved = ctx.getVariables(pattern, True)
+            dccBasedContext = self.dcc.detect_context(unresolved, pattern, context)
+            if dccBasedContext == context:
+                tkLogger.error("Could not find matching pattern of this asset in the current project !")
+                return None
+            context.update(dccBasedContext)
+            ctx.expandVariables(pattern, context)
         else:
             tkLogger.error("Could not find matching pattern of this asset in the current project !")
             return None
+
+        if (patternName and ctx.match(self.pipeline.getPattern(patternName, context), path)):
+            unresolved = ctx.getVariables(pattern, True)
+            if not unresolved == [] or inForceResolve:
+                tkLogger.info("Pattern unresolved or inForceResolve option is True !")
+                dccBasedContext = self.dcc.detect_context(unresolved, pattern, context)
+                context.update(dccBasedContext)
+        if inUpdateContext:
+            self.pipeline.context.update(context)
         return context

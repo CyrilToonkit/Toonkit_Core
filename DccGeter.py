@@ -1,14 +1,14 @@
 from . import tkLogger
 class DccGeter():
 
-    def detect_context():
+    def detect_context(self, inVariable, inPattern, inContext = {}):
         tkLogger.error("Detect context must be overwrite, you must use specific dcc geter !")
         raise AttributeError
         
-    def detect_template(inTemplatesSpecs, ns=""):
+    def detect_template(self):
         tkLogger.error("Detect template must be overwrite, you must use specific dcc geter !")
         raise AttributeError
 
-    def get_lod_var(lod_tags={}, inVariables = None):
-        tkLogger.error("get_lod_var must be overwrite, you must use specific dcc geter !")
+    def getSceneName():
+        tkLogger.error("getSceneName must be overwrite, you must use specific dcc geter !")
         raise AttributeError
