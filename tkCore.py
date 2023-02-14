@@ -26,13 +26,13 @@ __author__ = "Cyril GIBAUD - Toonkit"
 
 import importlib
 import inspect
-import logging
-import six
-import sys
-import os
-basestring = six.string_types
-logging.basicConfig()
+import time
+from functools import partial
+from timeit import timeit
+try: basestring
+except: basestring=str
 
+from . import tkLogger
 from .tkToolOptions.ToonkitCore import ToonkitCore
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -46,9 +46,6 @@ from .tkToolOptions.ToonkitCore import ToonkitCore
 
 TOOL = None
 PROJECT = None
-VERBOSE_ARGNAME = "inVerbose"
-LOGGER_ARGNAME = "inLogger"
-
 OPERATORS = ["==", "!=", ">", "<"]
 
 LINESEP = "\n"
@@ -66,44 +63,36 @@ def verbosed(func):
     """logLevel/debug decorator"""
 
     def wrapper(*args, **kwargs):
+        if tkLogger.level() != "DEBUG":
+            return func(*args, **kwargs)
 
         #inspect for arguments
         argspec = inspect.getargspec(func)
-        defaultArguments = list(reversed(list(zip(reversed(argspec.args), reversed(argspec.defaults)))))
+        defaultArguments = list(reversed(list(zip(reversed(argspec.args), reversed(argspec.defaults or [])))))
 
         all_kwargs = kwargs.copy()
         for arg, value in defaultArguments:
             if arg not in kwargs:
                 all_kwargs[arg] = value
 
-        oldLevel = None
-        if VERBOSE_ARGNAME in all_kwargs and LOGGER_ARGNAME in all_kwargs:
-            #If verbosed, log function name and arguments
-            oldLevel = all_kwargs[LOGGER_ARGNAME].getEffectiveLevel()
-            if all_kwargs[VERBOSE_ARGNAME]:
-                all_kwargs[LOGGER_ARGNAME].setLevel(logging.DEBUG)
+        #Format arguments
+        argsList = []
+        for arg in args:
+            argsList.append("\"{}\"".format(arg) if isinstance(arg, basestring) else str(arg))
+        
+        for key, value in all_kwargs.items():
+            if key in [VERBOSE_ARGNAME, LOGGER_ARGNAME]:
+                continue
 
-                #Format arguments
-                argsList = []
-                for arg in args:
-                    argsList.append("\"{}\"".format(arg) if isinstance(arg, basestring) else str(arg))
-                
-                for key, value in all_kwargs.iteritems():
-                    if key in [VERBOSE_ARGNAME, LOGGER_ARGNAME]:
-                        continue
-
-                    argsList.append(("{0}=\"{1}\"" if isinstance(value, basestring) else "{0}={1}").format(key, value)) 
-
-                all_kwargs[LOGGER_ARGNAME].debug("CALL {0}({1})\r\n".format(func.__name__, ",".join(argsList)))
-            else:
-                #Restore logLevel
-                all_kwargs[LOGGER_ARGNAME].setLevel(logging.WARNING)
+            argsList.append(("{0}=\"{1}\"" if isinstance(value, basestring) else "{0}={1}").format(key, value)) 
 
         #Actual function call
+        start = time.time()
         rslt = func(*args, **kwargs)
+        end = time.time()
+        duration = end - start
 
-        if not oldLevel is None:
-            all_kwargs[LOGGER_ARGNAME].setLevel(oldLevel)
+        tkLogger.debug("{0}.{1}({2}) took {3:.4f}s and returned '{4}'".format(func.__module__, func.__name__, ",".join(argsList), duration, rslt))
 
         return rslt
 
@@ -117,16 +106,18 @@ def verbosed(func):
  |____/|_|\___|\__|
                    
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+@verbosed
 def getReversedDict(inDict):
 
     reversedDict = {}
 
-    for key, value in inDict.iteritems():
+    for key, value in inDict.items():
         if not value in reversedDict:
             reversedDict[value] = key
 
     return reversedDict
 
+@verbosed
 def getFromDefaults(inDict, inKey, inLastDefault, *args):
     """
     Get a value from the first dictionary actually implementing the given key 
@@ -153,6 +144,63 @@ def getFromDefaults(inDict, inKey, inLastDefault, *args):
     return inLastDefault
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  _____         _   _             
+ |_   _|__  ___| |_(_)_ __   __ _ 
+   | |/ _ \/ __| __| | '_ \ / _` |
+   | |  __/\__ \ |_| | | | | (_| |
+   |_|\___||___/\__|_|_| |_|\__, |
+                            |___/ 
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+def timeThem(*args, **kwargs):
+    """
+    Benchmarks any callable passed in arguments, calling it with the remaining arguments (all functions must all accept these remaining given arguments and named arguments)
+    Takes "inNumber" as an hidden named argument for the number of calls (bigger values, =~100 are more accurate but longer of course...)
+    Example:
+        timeThem(objExists, melObjExists, pmObjExists, apiObjExists, "sphere1", inNumber=10)
+        objExists, melObjExists, pmObjExists and apiObjExists are functions that takes a string and tells if an object exists 
+    Outputs:
+        objExists        : 0.6530 returns 'False' (bool)
+        melObjExists     : 1.0602 ( *1.62) returns '0' (int)
+        pmObjExists      : 1.6226 ( *2.48) returns 'False' (bool)
+        apiObjExists     : 0.7104 ( *1.09) returns 'False' (bool)
+    """
+
+    funcs = []
+    funcArgs = list(args[:])
+    
+    #filter arguments
+    for arg in args:
+        if callable(arg):
+            funcs.append(arg)
+            funcArgs.remove(arg)
+    
+    key = "inNumber"
+    inNumber=10
+    if key in kwargs:
+        inNumber = kwargs[key]
+        del kwargs[key]
+
+    durations = []
+    refTime = 0.0
+
+    for func in funcs:
+        retVal = func(*funcArgs, **kwargs)
+        duration = timeit(partial(func, *funcArgs, **kwargs), number=inNumber)
+        
+        comparison = ""
+        if refTime <= 0.0:
+            refTime = duration
+        else:
+            comparison = " ( *{:.2f})".format(duration / refTime)
+            
+        print("{: <16} : {:.4f}".format(func.__name__, duration) + comparison + " returns '{}' ({})".format(retVal, type(retVal).__name__))
+        durations.append(duration)
+        
+    return durations
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   _____            _                                      _   
  | ____|_ ____   _(_)_ __ ___  _ __  _ __ ___   ___ _ __ | |_ 
  |  _| | '_ \ \ / / | '__/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __|
@@ -160,7 +208,7 @@ def getFromDefaults(inDict, inKey, inLastDefault, *args):
  |_____|_| |_|\_/ |_|_|  \___/|_| |_|_| |_| |_|\___|_| |_|\__|
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
+@verbosed
 def getTool():
     global TOOL
     if not TOOL:#Try to get core tool instance from interperter level
@@ -174,6 +222,7 @@ def getTool():
 
     return TOOL
 
+@verbosed
 def getProject(dccName="Dcc", inName=None):
     global PROJECT
     """Get a project object (current one if no name given)
@@ -189,6 +238,9 @@ def getProject(dccName="Dcc", inName=None):
 def getProjects():
     return ["demo"]
 
+@verbosed
+def getProjects():
+    return ["demo"]
 def getDcc(dccName):
     dccMod = None
     if sys.version_info >= (2,7):

@@ -23,21 +23,15 @@
 __author__ = "Cyril GIBAUD - Toonkit"
 
 from subprocess import call
-import logging
-logging.basicConfig()
-LOGGER = logging.getLogger(__name__)
-LOGGER.setLevel(logging.WARNING)
-DEBUG = False
-
-
 
 import os
 import shutil
 from . import tkCore as tc
+from . import tkLogger
 from .tkProjects import tkContext as tkcx
 
 @tc.verbosed
-def makedirs(inPath, inVerbose=DEBUG, inLogger=LOGGER):
+def makedirs(inPath):
     """Create directory structure is it does not exists already (can take a file path)"""
 
     #Manage case where a filename is given
@@ -52,7 +46,7 @@ def makedirs(inPath, inVerbose=DEBUG, inLogger=LOGGER):
             raise
 
 @tc.verbosed
-def copy(inInPath, inOutPath=None, inOutDir=None, inUseRobocopy=True, inVerbose=DEBUG, inLogger=LOGGER):
+def copy(inInPath, inOutPath=None, inOutDir=None, inUseRobocopy=True):
     """Copy file or directory"""
 
     assert not inOutPath is None or not inOutDir is None, "Output path and output directory cannot both be None !"
@@ -88,7 +82,7 @@ def copy(inInPath, inOutPath=None, inOutDir=None, inUseRobocopy=True, inVerbose=
 
 @tc.verbosed
 def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, inMove=False, inUseRobocopy=True,
-                    inAddVariables=None, inVariablesTranslator=None, inAllowDifferent=None, inUseDifferent=False, inVerbose=DEBUG, inLogger=LOGGER):
+                    inAddVariables=None, inVariablesTranslator=None, inAllowDifferent=None, inUseDifferent=False):
     """Copy or move file(s) from a hierarchy pattern to another"""
 
 
@@ -107,7 +101,7 @@ def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, in
 
     for srcFile in inFileList:
         if not os.path.isfile(srcFile):
-            LOGGER.debug("File '{}' does not exists, skip...".format(srcFile))
+            tkLogger.debug("File '{}' does not exists, skip...".format(srcFile))
             continue
 
         matched = True
@@ -141,20 +135,20 @@ def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, in
                             else:
                                 shutil.move(srcFile, destPath)
 
-                            LOGGER.info("copyTranslated : File '{0}' moved to '{1}'".format(srcFile, destPath))
+                            tkLogger.debug("copyTranslated : File '{0}' moved to '{1}'".format(srcFile, destPath))
                         else:
-                            copy(srcFile, destPath, inUseRobocopy=inUseRobocopy, inVerbose=inVerbose)
-                            LOGGER.info("copyTranslated : File '{0}' copied to '{1}'".format(srcFile, destPath))
+                            copy(srcFile, destPath, inUseRobocopy=inUseRobocopy)
+                            tkLogger.debug("copyTranslated : File '{0}' copied to '{1}'".format(srcFile, destPath))
 
                 break
 
         if not matched:
-            LOGGER.warning("File '{}' does not match any patterns !".format(srcFile))
+            tkLogger.warning("File '{}' does not match any patterns !".format(srcFile))
 
     return results
 
 @tc.verbosed
-def cleanPycs(inPath, inRecursive=True, inDryRun=False, inVerbose=DEBUG, inLogger=LOGGER):
+def cleanPycs(inPath, inRecursive=True, inDryRun=False):
     """Delete '.pyc's if the corresponding '.py' exists"""
     deletedFiles = []
 
@@ -169,9 +163,9 @@ def cleanPycs(inPath, inRecursive=True, inDryRun=False, inVerbose=DEBUG, inLogge
                         deletedFiles.append(elemPath)
                         if not inDryRun:
                             os.remove(elemPath)
-                        LOGGER.info("{}Removed {}".format("DRYRUN " if inDryRun else "", elem, elemPath))
+                        tkLogger.debug("{}Removed {}".format("DRYRUN " if inDryRun else "", elem, elemPath))
                     else:
-                        LOGGER.warning("WARNING : {} have no '.py' equivalent ({}) !".format(elem, elemPath))
+                        tkLogger.warning("WARNING : {} have no '.py' equivalent ({}) !".format(elem, elemPath))
             elif inRecursive:
                 cleanPycs(elemPath, inRecursive=True)
 
