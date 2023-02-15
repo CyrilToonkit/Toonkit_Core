@@ -235,12 +235,10 @@ def getProject(dccName="Dcc", inName=None):
         PROJECT =  tkProject.getClass(inName or getTool().options["project"])(inDCC = dcc())
     return PROJECT
 
-def getProjects():
-    return ["demo"]
-
 @verbosed
 def getProjects():
     return ["demo"]
+
 def getDcc(dccName):
     dccMod = None
     if sys.version_info >= (2,7):
