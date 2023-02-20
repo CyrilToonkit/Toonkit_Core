@@ -52,21 +52,18 @@ class base(tkProject):
         self.pipeline.addPattern("template", self.modulePath + r"\templates")
         self.setOverwrite([("Z:", "Q:")])
         self.pipeline.context = {"projectName": self.name, "repo":"local"}
-        self.pipeline.addConstant("baseContextKeys", ["projectName"])
+        self.pipeline.addConstant("baseContextKeys", ["projectName", "repo"])
         self.pipeline.baseContext = {key:value for (key, value) in self.pipeline.context.items() if key in self.baseContextKeys}
         
         # RawPath
         self.pipeline.addConstant("scriptFolder", self.pipeline.getPattern("scriptFolder"))
-        self.pipeline.addConstant("mocapPath", r"Q:\ToonKit\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma")
-
+        
         # PathProperties
         self.pipeline.addConstant("AngleListener", r"path={0}\templates\AngleListener\AngleListener.py".format(self.modulePath))
         self.pipeline.addConstant("ShadowRig", r"path={0}\templates\ShadowRig\ShadowRig.py".format(self.modulePath))
         self.pipeline.addConstant("RotationOrder", r"path={0}\templates\RotationOrder\RotationOrder.py".format(self.modulePath))
         self.pipeline.addConstant("PickWalk", r"path={0}\templates\RigSpecs\PickWalk.py".format(self.modulePath))
         
-        
-
         # Contantes
         self.pipeline.addConstant("rigGrp", "rig_grp")
         self.pipeline.addConstant("ctrlSetName", "::*anim_set")
@@ -77,7 +74,7 @@ class base(tkProject):
                                "Quadriped": [("Left_Foreleg_ParamHolder*", 0.75), ("Left_Foreleg_ParamHolder*", 0.75), ("Left_RearLeg_ParamHolder*", 0.75), ("Right_RearLeg_ParamHolder*", 0.75)],
                                "Bird": [("*Wing*", 1.5), ("*Feather*", 1)],# Feather is usless in my point of view
                                "Vehicule": [({"type":"tkWheel"}, 1), ("Undercarriage*", 1)],
-                               "Props": [("Global_SRT", 1), ("GlobalSR*", 1)]})
+                               "Props": [("Global_SRT", 0.75), ("GlobalSR*", 0.75)]})
 
         self.pipeline.addConstant("excludeTags", [
             ".+_geocns.*",
@@ -94,25 +91,9 @@ class base(tkProject):
             ".+_SW",
             ])
         self.pipeline.addConstant("dualQuatMeshs", ["*caruncle_layer1"])
-        self.pipeline.addConstant("forceInfShadowRig", [])
-        self.pipeline.addConstant("lodTags", {"LD":"lod2", "MD":"lod1", "HD":"lod0"})
-
-        # RigingKickstarterTamplate, it's for testing purpose. 
-        # To be delete befor commit !
-        self.pipeline.addConstant("mocapPrefix","MayaHIK_")
-        self.pipeline.addConstant("yup_zfront_preset", r"path={0}\templates\Mocap\yup_zfront_preset.py".format(self.modulePath))
-        self.pipeline.addConstant("mocapDefinition", r"path={0}\templates\Mocap\mocapDefinition.py".format(self.modulePath))
-        self.pipeline.addConstant("mocapBinding", r"path={0}\templates\Mocap\tamplate.py".format(self.modulePath))
-        self.pipeline.addConstant("mocapOrient", r"path={0}\templates\Mocap\presets.py".format(self.modulePath))
-        self.pipeline.addConstant("mocapSkeletonPath", r"Q:\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma".format(self.modulePath))
-
-        self.pipeline.addConstant("shadowrigOrients", r"path={0}\templates\ShadowRig\shadowrig_orients.py".format(self.modulePath))
-        self.pipeline.addConstant("shadowrigPreset", r"path={0}\templates\ShadowRig\shadowrig_preset.py".format(self.modulePath))
-        self.pipeline.addConstant("shadowrigRenamings", r"path={0}\templates\ShadowRig\shadowrig_renamings.py".format(self.modulePath))
-        self.pipeline.addConstant("shadowrigRotateorders", r"path={0}\templates\ShadowRig\shadowrig_rotateorders.py".format(self.modulePath))
-        self.pipeline.addConstant("rigOrients", r"path={0}\templates\RigSpecs\rigOrients.py".format(self.modulePath))
-
+        
         self.resolveProperties()
+
     def getProject(self):
         return tkc.TOOL.options["project"]
 

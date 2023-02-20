@@ -230,7 +230,7 @@ class tkProject(tkProjectObj):
             return None
         elif path is None:
             unresolved = ctx.getVariables(pattern, True)
-            dccBasedContext = self.dcc.detect_context(unresolved, pattern, context)
+            dccBasedContext = self.dcc.detect_context(inVariable=unresolved, inPattern=pattern, inContext=context)
             if dccBasedContext == context:
                 tkLogger.error("Could not find matching pattern of this asset in the current project !")
                 return None

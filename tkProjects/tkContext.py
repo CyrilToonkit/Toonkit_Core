@@ -227,7 +227,6 @@ def match(inPattern, inString, inVariables=None):
     inPattern = expandVariables(inPattern, inVariables)
     variables = re.findall(RE_VARIABLES, inPattern)
 
-
     if len(variables) > 0:
         if inVariables == None:
             inVariables = {}

@@ -24,9 +24,9 @@
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
-import importlib
 import inspect
 import time
+import sys
 from functools import partial
 from timeit import timeit
 try: basestring
@@ -81,14 +81,17 @@ def verbosed(func):
             argsList.append("\"{}\"".format(arg) if isinstance(arg, basestring) else str(arg))
         
         for key, value in all_kwargs.items():
-            if key in [VERBOSE_ARGNAME, LOGGER_ARGNAME]:
-                continue
-
             argsList.append(("{0}=\"{1}\"" if isinstance(value, basestring) else "{0}={1}").format(key, value)) 
 
         #Actual function call
         start = time.time()
-        rslt = func(*args, **kwargs)
+        try:
+            rslt = func(*args, **kwargs)
+        except Exception as e:
+            end = time.time()
+            duration = end - start
+            tkLogger.debug("{0}.{1}({2}) took {3:.4f}s and Failed Succesfuly! ".format(func.__module__, func.__name__, ",".join(argsList), duration))
+            raise e
         end = time.time()
         duration = end - start
 
@@ -246,14 +249,14 @@ def getDcc(dccName):
         try:
             dccMod = importlib.import_module("{0}Geter".format(dccName))
         except Exception as e:
-            logging.warning(str(e))
+            tkLogger.warning(str(e))
             dccMod = importlib.import_module("Toonkit_Core.DccGeter")
             dccName = "Dcc"
     else:
         try:
             dccMod = __import__("{0}Geter".format(dccName))
         except Exception as e:
-            logging.warning(str(e))
+            tkLogger.warning(str(e))
             dccMod = __import__("DccGeter")
             dccName = "Dcc"
 

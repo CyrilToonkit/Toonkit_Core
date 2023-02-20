@@ -62,7 +62,7 @@ def makedirs(inPath):
 def setLogsFiles(path):
     handlers = tkLogger.handlers
     if len(handlers) == 0:
-        logForm = logging.Formatter(fmt='[%(asctime)s, Level:%(levelname)s, Module:%(module)s, Func:%(funcName)s, Ligne:%(lineno)d]:    %(message)s', datefmt='%H:%M:%S')
+        logForm = logging.Formatter(fmt='%(asctime)s, Level:%(levelname)s, Module:%(module)s, Func:%(funcName)s, Ligne:%(lineno)d,    %(message)s', datefmt='%H:%M:%S')
         makedirs(path)
         fileHandler = logging.FileHandler(path)
         fileHandler.setLevel(tkLogger.level)
