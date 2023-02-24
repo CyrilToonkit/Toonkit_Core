@@ -34,7 +34,7 @@ class base(tkProject):
         tkLogger.info(args)
 
         self.pipeline.addConstant("modulePath", os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)))
-        self.name = self.getProject()
+        self.name = kwargs["inName"] or self.getProject()
 
         self.pipeline.addPattern("IOProject", ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name}))
         if not self.pipeline._patterns["IOProject"]._value:
@@ -95,7 +95,7 @@ class base(tkProject):
         self.resolveProperties()
 
     def getProject(self):
-        return tkc.TOOL.options["project"]
+        return tkc.getTool().options["project"]
 
     def setOverwrite(self, inRoots):
         for key, value in self.pipeline._patterns.items():

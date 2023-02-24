@@ -25,6 +25,7 @@ __author__ = "Cyril GIBAUD - Toonkit"
 from subprocess import call
 
 import os
+import sys
 import shutil
 from . import tkCore as tc
 from . import tkLogger
@@ -170,3 +171,37 @@ def cleanPycs(inPath, inRecursive=True, inDryRun=False):
                 cleanPycs(elemPath, inRecursive=True)
 
     return deletedFiles
+
+def getModuleFromPath(inPath):
+    mod = None
+    if inPath.endswith(".py"):
+        if os.path.isfile(inPath):
+            inPath = inPath[:-3]
+        else:
+            raise Exception("The file {} doesn't exist !".format(inPath))
+    else:
+        if not os.path.isfile(inPath + ".py"):
+            raise Exception("The file {} doesn't exist !".format(inPath))
+
+    dirName = os.path.dirname(inPath)
+
+    if not dirName in sys.path:
+        sys.path.append(dirName)
+    moduleName = os.path.split(inPath)[-1]
+    if sys.version_info >= (2,7):
+        import importlib
+        try:
+            mod = importlib.import_module(moduleName)
+        except Exception as e:
+            tkLogger.error(str(e))
+            raise e
+
+    else:
+        try:
+            mod = __import__(moduleName)
+        except:
+            tkLogger.error(str(e))
+            raise e
+    if dirName in sys.path:
+        sys.path.remove(dirName)
+    return mod

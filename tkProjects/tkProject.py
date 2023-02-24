@@ -32,7 +32,7 @@ from . import tkPipeline as tkpipe
 from .dbEngines.dbEngine import dbEngine
 
 from .tkProjectObj import tkProjectObj
-from .. import tkLogger
+from .. import tkLogger, tkCore, tkFs
 
 try: basestring
 except: basestring = str
@@ -49,10 +49,10 @@ default =  {
 REPOSITORIES["default"] = default
 
 class tkProject(tkProjectObj):
-    def __init__(self, inEngine=dbEngine(), inDCC=None, inType="Project", *args, **kwargs):
+    def __init__(self, inEngine=dbEngine(), inDCC=None, inName=None, inType="Project", *args, **kwargs):
         super(tkProject, self).__init__(inEngine, inType=inType, inParent=None, *args, **kwargs)
 
-        self.name="tkProject"
+        self.name=inName
         self.pipeline = tkpipe.tkPipeline()
         self._engine = inEngine
         self.dcc = inDCC
@@ -94,7 +94,11 @@ class tkProject(tkProjectObj):
                 pass
 
         else:
-            mod = __import__("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+            try:
+                mod = __import__("Toonkit_Core.tkProjects.projects.{0}".format(inName))
+            except:
+                tkLogger.warning(str(e))
+                pass
 
         if mod is None:
             return None 
@@ -105,9 +109,10 @@ class tkProject(tkProjectObj):
         return toolClass
 
     @staticmethod
-    def getClass(inName):
+    @tkCore.verbosed
+    def getClass(inName, inPaths = []):
         project = None
-
+        
         folder = os.path.dirname(os.path.realpath(__file__))
         projectsFolder = os.path.join(folder, "projects")
         
@@ -116,6 +121,16 @@ class tkProject(tkProjectObj):
         if inName + ".py" in subFiles:
             project = tkProject._get(inName)
             tkLogger.info(project)
+        else:
+            if not isinstance(inPaths, (list, tuple)):
+                inPaths = [inPaths]
+            for path in inPaths:
+                if os.path.isdir(path):
+                    subfiles = os.listdir(path)
+                    if inName + ".py" in subfiles:#Warning if getModuleFromPath is None
+                        module = tkFs.getModuleFromPath(os.path.join(path, inName))
+                        if module:
+                            project = getattr(module, inName)
 
         if project is None:
             tkLogger.warning("No project given or found, default used !")

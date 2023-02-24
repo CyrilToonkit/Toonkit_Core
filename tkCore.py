@@ -234,9 +234,33 @@ def getProject(dccName="Dcc", inName=None):
     """
     from .tkProjects.tkProject import tkProject
     if not PROJECT:
-        dcc = getDcc(dccName)
-        PROJECT =  tkProject.getClass(inName or getTool().options["project"])(inDCC = dcc())
+        dcc = getDcc(dccName)()
+        PROJECT =  tkProject.getClass(inName or getTool().options["project"], getTool().options["alternateProjectsPath"].split(","))(inDCC = dcc, inName=inName)
     return PROJECT
+
+def setProject(dccName="Dcc", inName=None):
+    global PROJECT
+    oldProject = PROJECT
+    if PROJECT and dccName == "Dcc":
+        dcc = PROJECT.dcc
+    else:
+        dcc = getDcc(dccName)()
+    PROJECT = None
+    try:
+        newProj = getProject(dccName=dcc.name, inName=inName)
+    except:
+        newProj = None
+    if newProj and newProj.name == inName:
+        PROJECT = newProj
+    else:
+        tkLogger.error("No project matching name '{}', unable to initialse tkProject. Old project returned.".format(inName))
+        del newProj
+        PROJECT = oldProject
+    return PROJECT
+
+def resetProject():
+    global PROJECT
+    PROJECT = None
 
 @verbosed
 def getProjects():

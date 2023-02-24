@@ -1,6 +1,9 @@
 from . import tkLogger
-class DccGeter():
+from . import tkCore
 
+
+class DccGeter():
+    name = "Dcc"
     def detect_context(self, inVariable, inPattern, inContext = {}):
         tkLogger.error("Detect context must be overwrite, you must use specific dcc geter !")
         raise AttributeError

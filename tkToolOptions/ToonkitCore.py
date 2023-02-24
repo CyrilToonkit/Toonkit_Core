@@ -42,6 +42,7 @@ class ToonkitCore(Tool):
         #Configuration
         self.options.addOption("project", "demo", None, "Project name", False, "Configuration")
         self.options.addOption("debug", inDebug, "Log more verbose messages", "Debug", False, "Configuration")
+        self.options.addOption("alternateProjectsPath", r"", "Alternate projects folders (comas separated) to find project configuration", "Alternate Projects Folder", False, "Configuration")
 
         if not self.options.isSaved():
             self.saveOptions()

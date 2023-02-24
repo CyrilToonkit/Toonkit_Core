@@ -401,7 +401,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
             innerVariables = re.findall(RE_VARIABLES, item)
             
             if len(innerVariables) > 0:
-                items = sorted(os.listdir(confirmedPath))
+                items = sorted(os.listdir(confirmedPath), key=lambda v: v.lower())
                 parsings+=1
                 pattern = item
 
