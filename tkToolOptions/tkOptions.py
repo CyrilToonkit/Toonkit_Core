@@ -91,6 +91,7 @@ class Options(object):
                 self.addOption(key, value)
 
         self._changedCallbacks = []
+        self._savedCallbacks = []
 
     def getOption(self, inName, inValue=None, inOptions=None, inCreate=True):
         options = inOptions or self.__options
@@ -229,8 +230,11 @@ class Options(object):
     def isSaved(self):
         return os.path.isfile(self.__path)
 
-    def addCallback(self, callback):
+    def addChangedCallback(self, callback):
         self._changedCallbacks.append(callback)
+
+    def addSavedCallback(self, callback):
+        self._savedCallbacks.append(callback)
 
     def _optionChanged(self, *args, **kwargs):
         for f in self._changedCallbacks:
@@ -267,7 +271,8 @@ class Options(object):
         except Exception as e:
             print ("Error saving options : {0}".format(e))
             return False
-
+        for f in self._savedCallbacks:
+            f()
         return True
 
     def load(self, inPath=None):

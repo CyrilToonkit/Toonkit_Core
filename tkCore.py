@@ -214,12 +214,6 @@ def timeThem(*args, **kwargs):
 @verbosed
 def getTool():
     global TOOL
-    if not TOOL:#Try to get core tool instance from interperter level
-        try:
-            TOOL = eval("tc.TOOL")
-        except:
-            pass
-
     if not TOOL:
         TOOL = ToonkitCore()
 
@@ -240,6 +234,9 @@ def getProject(dccName="Dcc", inName=None):
 
 def setProject(dccName="Dcc", inName=None):
     global PROJECT
+    if PROJECT and PROJECT.name == inName:
+        tkLogger.info("Project {} is allrady set !".format(inName))
+        return PROJECT
     oldProject = PROJECT
     if PROJECT and dccName == "Dcc":
         dcc = PROJECT.dcc
