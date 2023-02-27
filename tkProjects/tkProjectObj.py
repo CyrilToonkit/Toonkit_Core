@@ -44,7 +44,8 @@ class tkProjectObj(object):
         "parent",
         "engine",
         "pipeline",
-        "dcc"
+        "dcc",
+        "isProjectValid"
         ]
 
     def __init__(self, inEngine=dbEngine(), inType=None, inParent=None, *args, **kwargs):

@@ -38,7 +38,9 @@ class base(tkProject):
 
         self.pipeline.addPattern("IOProject", ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name}))
         if not self.pipeline._patterns["IOProject"]._value:
-            raise Exception("Unable to get valide In/Out project folder !")
+            tkLogger.error("Unable to get valide In/Out project folder !")
+            self.isProjectValid = False
+            return None
         self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
 
         self.pipeline.addPattern("releasePattern", r"{IOProject}\DELIVERY\{assetType}\{name:.+}\{name:.+}_{lodTag}_v{version:[0-9]{3}<-1>}.ma")

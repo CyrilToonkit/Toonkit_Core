@@ -56,6 +56,7 @@ class tkProject(tkProjectObj):
         self.pipeline = tkpipe.tkPipeline()
         self._engine = inEngine
         self.dcc = inDCC
+        self.isProjectValid = True
 
     def __getattr__(self, inName):
         if inName in tkProjectObj.PROTECTEDMEMBERS:

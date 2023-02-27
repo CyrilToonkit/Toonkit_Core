@@ -247,7 +247,7 @@ def setProject(dccName="Dcc", inName=None):
         newProj = getProject(dccName=dcc.name, inName=inName)
     except:
         newProj = None
-    if newProj and newProj.name == inName:
+    if newProj and newProj.isProjectValid and newProj.name == inName:
         PROJECT = newProj
     else:
         tkLogger.error("No project matching name '{}', unable to initialse tkProject. Old project returned.".format(inName))
