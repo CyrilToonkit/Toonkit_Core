@@ -177,12 +177,14 @@ class tkProject(tkProjectObj):
                 if isinstance(override, basestring) and override.lower().startswith("path="):
                     projectProp._overrides[nb] = (dictKey, self.resolvePathPropertie(key, os.path.join(override[5:]))[1])
 
-            for key, value in newItems:
-                self.pipeline._constants[key]._value = value
+        for key, value in newItems:
+            self.pipeline._constants[key]._value = value
         
         return self._properties
     
+    @tkCore.verbosed
     def resolvePathPropertie(self, name, path):
+        path = os.path.expandvars(path)
         if os.path.isfile(path):
             if path.endswith(".py"):
                 data = self._resolveVarInData(path)

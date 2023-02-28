@@ -35,6 +35,7 @@ class base(tkProject):
 
         self.pipeline.addConstant("modulePath", os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)))
         self.name = kwargs["inName"] or self.getProject()
+        os.environ["TK_MODULE_PATH"] = self.modulePath
 
         self.pipeline.addPattern("IOProject", ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name}))
         if not self.pipeline._patterns["IOProject"]._value:
@@ -61,23 +62,24 @@ class base(tkProject):
         self.pipeline.addConstant("scriptFolder", self.pipeline.getPattern("scriptFolder"))
         
         # PathProperties
-        self.pipeline.addConstant("AngleListener", r"path={0}\templates\AngleListener\AngleListener.py".format(self.modulePath))
-        self.pipeline.addConstant("ShadowRig", r"path={0}\templates\ShadowRig\ShadowRig.py".format(self.modulePath))
-        self.pipeline.addConstant("RotationOrder", r"path={0}\templates\RotationOrder\RotationOrder.py".format(self.modulePath))
-        self.pipeline.addConstant("PickWalk", r"path={0}\templates\RigSpecs\PickWalk.py".format(self.modulePath))
-        
+        self.pipeline.addConstant("AngleListener", r"path=%tk_module_path%\templates\AngleListener\angle_listener.py")
+        # self.pipeline.addConstant("ShadowRig", r"path={0}\templates\ShadowRig\shadowrig_hierarchy.py".format(self.modulePath))
+        self.pipeline.addConstant("ShadowRig", None)
+        self.pipeline.addConstant("RotationOrder", r"path=%tk_module_path%\templates\RigSpecs\rotation_order.py")
+        self.pipeline.addConstant("PickWalk", r"path=%tk_module_path%\templates\RigSpecs\pick_walk.py")
+        self.pipeline.addConstant("templatesSpecs", r"path=%tk_module_path%\templates\RigSpecs\assets_specs.py")
+        self.pipeline.addConstant("assetTypeToSpec", r"path=%tk_module_path%\templates\RigSpecs\asset_type_to_spec.py")
+        # self.pipeline.addConstant("rigOrients", r"path={0}\templates\RigSpecs\rig_orients.py".format(self.modulePath), [({"assetType":"props"}, None)])
+        self.pipeline.addConstant("rigOrients",None)
+
         # Contantes
         self.pipeline.addConstant("rigGrp", "rig_grp")
         self.pipeline.addConstant("ctrlSetName", "::*anim_set")
         self.pipeline.addConstant("geoSetName", "::*geo_set")
         self.pipeline.addConstant("modNamespace", "MOD")
         self.pipeline.addConstant("hideSuffix", ["_PRO", "_PXY"])
-        self.pipeline.addConstant("templatesSpecs", {"Biped":[("Left_Leg_ParamHolder*", 0.75), ("Right_Leg_ParamHolder*", 0.75), ("Left_Arm_ParamHolder*", 0.75), ("Right_Arm_ParamHolder*", 0.75)],
-                               "Quadriped": [("Left_Foreleg_ParamHolder*", 0.75), ("Left_Foreleg_ParamHolder*", 0.75), ("Left_RearLeg_ParamHolder*", 0.75), ("Right_RearLeg_ParamHolder*", 0.75)],
-                               "Bird": [("*Wing*", 1.5), ("*Feather*", 1)],# Feather is usless in my point of view
-                               "Vehicule": [({"type":"tkWheel"}, 1), ("Undercarriage*", 1)],
-                               "Props": [("Global_SRT", 0.75), ("GlobalSR*", 0.75)]})
-
+        self.pipeline.addConstant("controlerWidth", 2.2)
+        self.pipeline.addConstant("hilightController", ["Hips","Global_SRT","Local_SRT", "POS_ctrl", "TRAJ_ctrl", "Fly"])
         self.pipeline.addConstant("excludeTags", [
             ".+_geocns.*",
             ".+_GeoCns.*",
