@@ -31,7 +31,6 @@ import os
 class base(tkProject):
     def __init__(self, *args, **kwargs):
         super(base, self).__init__(*args, **kwargs)
-        tkLogger.info(args)
 
         self.pipeline.addConstant("modulePath", os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir, os.pardir, os.pardir)))
         self.name = kwargs["inName"] or self.getProject()
@@ -84,12 +83,14 @@ class base(tkProject):
             ".+_geocns.*",
             ".+_GeoCns.*",
             ".+_geoconst.*",
+            ".+_under.*",
             ".+_prx.*",
             ".+_PRX.*",
             ".+_tri",
             ".+_patch",
             ".+_eyelid_target.*",
             ".+_eyelid_wrapper.*",
+            ".+_proxy_.+",
             ".+_geo_cns",
             ".+_ref",
             ".+_SW",
