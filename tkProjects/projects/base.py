@@ -79,23 +79,22 @@ class base(tkProject):
         self.pipeline.addConstant("hideSuffix", ["_PRO", "_PXY"])
         self.pipeline.addConstant("controlerWidth", 2.2)
         self.pipeline.addConstant("hilightController", ["Hips","Global_SRT","Local_SRT", "POS_ctrl", "TRAJ_ctrl", "Fly"])
-        self.pipeline.addConstant("excludeTags", [
-            ".+_geocns.*",
-            ".+_GeoCns.*",
-            ".+_geoconst.*",
-            ".+_under.*",
-            ".+_prx.*",
-            ".+_PRX.*",
-            ".+_tri",
-            ".+_patch",
-            ".+_eyelid_target.*",
-            ".+_eyelid_wrapper.*",
-            ".+_proxy_.+",
-            ".+_geo_cns",
-            ".+_ref",
-            ".+_SW",
-            ])
+        self.pipeline.addConstant("excludeTags", [])
         self.pipeline.addConstant("dualQuatMeshs", ["*caruncle_layer1"])
+        self.pipeline.addConstant("deletePatternList", [".+_OSCAR_Attributes",
+                        ".+_TK_CtrlsChannelsDic",
+                        ".+_TK_CtrlsDic",
+                        ".+_TK_KeySets",
+                        ".+_TK_KeySetsTree",
+                        ".+_TK_ParamsDic",
+                        ".+Neutral.+failed",
+                        ".+FKREF",
+                        ".+IKREF",
+                        ".+Leg_Root_Sensor.+",
+                        ".+_Frame",
+                        ".*abcData",
+                        ".+_HandProp_Main_Deform",
+                        ".+_poleHelper"])
         
         self.resolveProperties()
 
