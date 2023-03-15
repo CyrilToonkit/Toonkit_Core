@@ -36,11 +36,16 @@ class base(tkProject):
         self.name = kwargs["inName"] or self.getProject()
         os.environ["TK_MODULE_PATH"] = self.modulePath
 
-        self.pipeline.addPattern("IOProject", ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name}))
-        if not self.pipeline._patterns["IOProject"]._value:
-            tkLogger.error("Unable to get valide In/Out project folder !")
-            self.isProjectValid = False
-            return None
+        path = ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name})
+        if not path is None:
+            self.pipeline.addPattern("IOProject", path)
+        else:
+            self.pipeline.addPattern("IOProject", r"Q:\0000_{0}".format(self.name) )
+            tkLogger.warning("No valide In Out project folder found, Base project used !")
+        # if not self.pipeline._patterns["IOProject"]._value:
+        #     tkLogger.error("Unable to get valide In/Out project folder !")
+        #     self.isProjectValid = False
+        #     return None
         self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
 
         self.pipeline.addPattern("releasePattern", r"{IOProject}\DELIVERY\{assetType}\{name:.+}\{name:.+}_{lodTag}_v{version:[0-9]{3}<-1>}.ma")
@@ -70,12 +75,12 @@ class base(tkProject):
         self.pipeline.addConstant("assetTypeToSpec", r"path=%tk_module_path%\templates\RigSpecs\asset_type_to_spec.py")
         # self.pipeline.addConstant("rigOrients", r"path={0}\templates\RigSpecs\rig_orients.py".format(self.modulePath), [({"assetType":"props"}, None)])
         self.pipeline.addConstant("rigOrients",None)
-
+        
         # Contantes
         self.pipeline.addConstant("rigGrp", "rig_grp")
         self.pipeline.addConstant("ctrlSetName", "::*anim_set")
         self.pipeline.addConstant("geoSetName", "::*geo_set")
-        self.pipeline.addConstant("modNamespace", "MOD")
+        self.pipeline.addConstant("modNamespace", None)
         self.pipeline.addConstant("hideSuffix", ["_PRO", "_PXY"])
         self.pipeline.addConstant("controlerWidth", 2.2)
         self.pipeline.addConstant("hilightController", ["Hips","Global_SRT","Local_SRT", "POS_ctrl", "TRAJ_ctrl", "Fly"])
