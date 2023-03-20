@@ -235,7 +235,7 @@ def getProject(dccName="Dcc", inName=None):
 def setProject(dccName="Dcc", inName=None):
     global PROJECT
     if PROJECT and PROJECT.name == inName:
-        tkLogger.info("Project {} is allrady set !".format(inName))
+        tkLogger.info("Project {} is already set !".format(inName))
         return PROJECT
     oldProject = PROJECT
     if PROJECT and dccName == "Dcc":
@@ -245,12 +245,14 @@ def setProject(dccName="Dcc", inName=None):
     PROJECT = None
     try:
         newProj = getProject(dccName=dcc.name, inName=inName)
-    except:
+    except Exception as e:
+        tkLogger.warning(str(e))
         newProj = None
+
     if newProj and newProj.name == inName:
         PROJECT = newProj
     else:
-        tkLogger.error("No project matching name '{}', unable to initialse tkProject. Old project returned.".format(inName))
+        tkLogger.error("No project matching name '{}', unable to initialize tkProject ({}). Old project returned.".format(inName, newProj))
         del newProj
         PROJECT = oldProject
     return PROJECT
