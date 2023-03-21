@@ -61,6 +61,7 @@
 import os
 import re
 from .. import tkLogger
+from .. import tkCore as tc
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -216,8 +217,6 @@ def regroupKnownChunks(inSplit):
         else:
             splitGroup.append(split)
 
-        #print "splitGroup",splitGroup,"splitPathRegrouped",splitPathRegrouped
-
     if len(splitGroup) > 0:
         splitPathRegrouped.append(os.path.sep.join(splitGroup))
 
@@ -249,7 +248,7 @@ def match(inPattern, inString, inVariables=None):
             pattern = pattern.replace(variable, "("+variableReg+")")
 
         curReg = re.compile(pattern.replace('\\', r'\\'), re.IGNORECASE)
-        tkLogger.info("expression : {0}, path: {1}".format(pattern, inString))
+        tkLogger.debug("expression : {0}, path: {1}".format(pattern, inString))
         matchObj = re.search(curReg, inString)
 
         if not matchObj:
@@ -348,8 +347,8 @@ def resolvePath(inPath, inVariables=None, inAcceptUndefinedResults=False, inVerb
 
 #Beware, only works with "{}" variables enclosures, because it relies on str.format()...
 #todo "Create" mode ?
+@tc.verbosed
 def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, inFiles=True, inFolders=True, inAcceptUndefinedResults=False, inVerbose=False):
-    tkLogger.info("! collectPath called (inPath={0}, inVariables={1}, inMaxResults={2},inRootExists={3},inFiles={4},inFolders={5},inAcceptUndefinedResults={6})".format(inPath, inVariables,inMaxResults,inRootExists,inFiles,inFolders,inAcceptUndefinedResults))
 
     #Todo maybe we can be smart on the way we want to confirm existence of root... 
     inRootExists = False
@@ -365,8 +364,8 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
     parseAblePath = expandVariables(inPath, inVariables)
     variables = re.findall(RE_VARIABLES, parseAblePath)
 
-    tkLogger.info(("parseAblePath",parseAblePath))
-    tkLogger.info(("variables", variables))
+    tkLogger.debug(("parseAblePath",parseAblePath))
+    tkLogger.debug(("variables", variables))
 
     #Need real parsing
     if len(variables) > 0:
@@ -459,7 +458,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
             checkings+=1
             results = [(parseAblePath,inVariables)]
 
-    tkLogger.info("! resolvePath performed {0} file checks and {1} directories parsing".format(checkings, parsings))
+    tkLogger.debug("! resolvePath performed {0} file checks and {1} directories parsing".format(checkings, parsings))
 
     return results
 

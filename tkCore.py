@@ -235,7 +235,7 @@ def getProject(dccName="Dcc", inName=None):
 def setProject(dccName="Dcc", inName=None):
     global PROJECT
     if PROJECT and PROJECT.name == inName:
-        tkLogger.info("Project {} is already set !".format(inName))
+        tkLogger.debug("Project {} is already set !".format(inName))
         return PROJECT
     oldProject = PROJECT
     if PROJECT and dccName == "Dcc":
