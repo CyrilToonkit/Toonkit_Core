@@ -74,9 +74,9 @@ def setLogsFiles(path):
 def setLevel(level):
     tkLogger.setLevel(level)
     if isinstance(level, int):
-        tkLogger.info("Logger level set to {}".format(_levelToName[level]))
+        tkLogger.debug("Logger level set to {}".format(_levelToName[level]))
     else:
-        tkLogger.info("Logger level set to {}".format(level))
+        tkLogger.debug("Logger level set to {}".format(level))
     handlers = tkLogger.handlers
     if len(handlers) !=0:
         for handler in handlers:

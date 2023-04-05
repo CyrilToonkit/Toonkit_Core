@@ -121,7 +121,7 @@ class tkProject(tkProjectObj):
 
         if inName + ".py" in subFiles:
             project = tkProject._get(inName)
-            tkLogger.info(project)
+            tkLogger.debug("Class instanced correctly : ", str(project))
         else:
             if not isinstance(inPaths, (list, tuple)):
                 inPaths = [inPaths]

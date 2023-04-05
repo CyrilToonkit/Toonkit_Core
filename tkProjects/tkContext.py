@@ -370,7 +370,7 @@ def collectPath(inPath, inVariables=None, inMaxResults=0, inRootExists=False, in
     #Need real parsing
     if len(variables) > 0:
         splitPath = parseAblePath.split(os.path.sep)
-        if len(splitPath[0]) + len(splitPath[1]) == 0:
+        if not len(splitPath) == 1 and len(splitPath[0]) + len(splitPath[1]) == 0:
             #Shoud be a windows network root
             del splitPath[:2]
             splitPath[0] = r"\\" + splitPath[0]

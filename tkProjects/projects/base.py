@@ -41,7 +41,7 @@ class base(tkProject):
             self.pipeline.addPattern("IOProject", path)
         else:
             self.pipeline.addPattern("IOProject", r"Q:\0000_{0}".format(self.name))
-            tkLogger.warning("No valid Input Output folder found ('{}''), used '{}' !".format(r"Q:\{projectNumber:[0-9]{4}}_{projectName}", r"Q:\0000_{0}".format(self.name)))
+            tkLogger.debug("No valid Input Output folder found ('{}''), used '{}' !".format(r"Q:\{projectNumber:[0-9]{4}}_{projectName}", r"Q:\0000_{0}".format(self.name)))
         # if not self.pipeline._patterns["IOProject"]._value:
         #     tkLogger.error("Unable to get valide In/Out project folder !")
         #     self.isProjectValid = False
