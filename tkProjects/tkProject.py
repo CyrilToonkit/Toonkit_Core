@@ -265,5 +265,5 @@ class tkProject(tkProjectObj):
                 dccBasedContext = self.dcc.detect_context(unresolved, pattern, context)
                 context.update(dccBasedContext)
         if inUpdateContext:
-            self.pipeline.context.update(context)
+            self.pipeline.context = context
         return context
