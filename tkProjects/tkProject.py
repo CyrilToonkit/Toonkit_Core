@@ -65,7 +65,7 @@ class tkProject(tkProjectObj):
             if inName in self.pipeline._constants:
                 return self.pipeline._constants[inName].get(self.pipeline.context)
             if inName in self.pipeline._patterns:
-                return self.pipeline.getPattern(inName)
+                return self.pipeline.getPattern(inName, inDict=self.pipeline.context)
         
         return tkProjectObj.__getattr__(self, inName)
     
@@ -148,6 +148,50 @@ class tkProject(tkProjectObj):
                         break
 
         return project
+
+    def indentStr(self, inStr, inIndentLevel=1, inIndentStr = " ", inIndentAmout=4):
+        return (inIndentStr * inIndentAmout * inIndentLevel) + str(inStr)
+    
+    def reduceStr(self, inStr, inMaxLength=120, inCutStr = " ... "):
+        if len(inStr) <= inMaxLength:
+            return inStr
+        maxLen = inMaxLength - len(inCutStr)
+        return inStr[:int(maxLen/2)] + inCutStr + inStr[-int(maxLen/2):]
+
+    def help(self, inContext=None):
+        lines = []
+        indentLevel = 0
+
+        lines.append(self.indentStr("Project Name : {name}".format(name = self.name), indentLevel))
+        lines.append(self.indentStr("Dcc Name : {dccName}".format(dccName = self.dcc.name), indentLevel))
+
+        lines.append(self.indentStr("Projet Patterns : ", indentLevel))
+        indentLevel +=1
+        for patternName, patternData in sorted(list(self.pipeline._patterns.items()), key= lambda kvPair: kvPair[0]):
+            patternValue = self.pipeline.getPattern(patternName, inContext)
+            lines.append(self.indentStr("{patternName} : {patternValue}".format(patternName=patternName, patternValue=patternValue), indentLevel))
+            if len(patternData._overrides) > 0 and inContext == None:
+                indentLevel +=1
+                lines.append(self.indentStr("Overrides :", indentLevel))
+                for overrides in  patternData._overrides:
+                    lines.append(self.indentStr("- {0} : {1}".format(*overrides), indentLevel))
+                indentLevel -=1
+        indentLevel -=1
+        lines.append(self.indentStr("Project Constants : ", indentLevel))
+        indentLevel +=1
+        for constantName, constantData in sorted(list(self.pipeline._constants.items()), key= lambda kvPair: kvPair[0]):
+            constantValue = constantData.get(inContext)
+            lines.append(self.indentStr("{constantName} : {constantValue}".format(constantName=constantName, constantValue=constantValue), indentLevel))
+            if len(constantData._overrides) > 0 and inContext == None:
+                indentLevel += 1
+                lines.append(self.indentStr("Overrides : ", indentLevel))
+                for overrides in constantData._overrides:
+                    lines.append(self.indentStr("- {0} : {1}".format(*overrides), indentLevel))
+                indentLevel -=1
+        indentLevel -=1
+        
+        message = os.linesep.join(lines)
+        print(message)
 
     def getEntitiesPatterns(self, inRepo="default"):
         repo = self._repositories.get(inRepo)
@@ -265,5 +309,5 @@ class tkProject(tkProjectObj):
                 dccBasedContext = self.dcc.detect_context(unresolved, pattern, context)
                 context.update(dccBasedContext)
         if inUpdateContext:
-            self.pipeline.context = context
+            self.pipeline.context.update(context)
         return context

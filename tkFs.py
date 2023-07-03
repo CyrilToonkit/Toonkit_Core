@@ -190,8 +190,10 @@ def getModuleFromPath(inPath):
     moduleName = os.path.split(inPath)[-1]
     if sys.version_info >= (2,7):
         import importlib
+        from imp import reload
         try:
             mod = importlib.import_module(moduleName)
+            reload(mod)
         except Exception as e:
             tkLogger.error(str(e))
             raise e

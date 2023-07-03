@@ -27,6 +27,7 @@ from ..tkProject import tkProject
 from .. import tkContext as ctx
 from ... import tkCore as tkc
 import os
+import tkRig
 
 class base(tkProject):
     def __init__(self, *args, **kwargs):
@@ -36,18 +37,18 @@ class base(tkProject):
         self.name = kwargs["inName"] or self.getProject()
         os.environ["TK_MODULE_PATH"] = self.modulePath
 
+        ### __INIT__Patterns__ ###
+
         path = ctx.resolvePath(r"Q:\{projectNumber:[0-9]{4}}_{projectName}" , {"projectName":self.name})
         if not path is None:
             self.pipeline.addPattern("IOProject", path)
         else:
             self.pipeline.addPattern("IOProject", r"Q:\0000_{0}".format(self.name))
             tkLogger.debug("No valid Input Output folder found ('{}''), used '{}' !".format(r"Q:\{projectNumber:[0-9]{4}}_{projectName}", r"Q:\0000_{0}".format(self.name)))
-        # if not self.pipeline._patterns["IOProject"]._value:
-        #     tkLogger.error("Unable to get valide In/Out project folder !")
-        #     self.isProjectValid = False
-        #     return None
-        self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
 
+        self.pipeline.addPattern("_template", self.modulePath + r"\templates")
+
+        self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
         self.pipeline.addPattern("releasePattern", r"{IOProject}\DELIVERY\{assetType}\{name:.+}\{name:.+}_{lodTag}_v{version:[0-9]{3}<-1>}.ma")
         self.pipeline.addPattern("deltaFolder", r"{IOProject}\Interne\DELTAS")
         self.pipeline.addPattern("assetAnPattern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}.ma")
@@ -55,51 +56,114 @@ class base(tkProject):
         self.pipeline.addPattern("assetMasterPattern", r"{OSCARProject}\Assets\{name:.+}_MASTER.ma")
         self.pipeline.addPattern("assetMasterRawPattern", r"{OSCARProject}\Assets\{name:.+}_MASTER_RAW.ma")
         self.pipeline.addPattern("assetRigPattern", r"{OSCARProject}\Assets\{name:.+}\{name:.+}.ma")
-        self.pipeline.addPattern("scriptFolder", r"{OSCARProject}\Scripts")
-        self.pipeline.addPattern("template", self.modulePath + r"\templates")
+        self.pipeline.addPattern("modelingPattern", r"Q:\{projectNumber:[0-9]{4}_{projectName}\SOURCE\{name:.+}_v{modVersion:[0-9]{3}<-1>}.abc") # <= To be refered to the SOURCE dir 
+        self.pipeline.addPattern("scriptFolder", r"{OSCARProject}\Scripts") # Unused for now
         self.setOverwrite([("Z:", "Q:")])
         self.pipeline.context = {"projectName": self.name, "repo":"local"}
+
+        ### __INIT__Constants__ ###    
+        
         self.pipeline.addConstant("baseContextKeys", ["projectName", "repo"])
         self.pipeline.baseContext = {key:value for (key, value) in self.pipeline.context.items() if key in self.baseContextKeys}
-        
-        # RawPath
-        self.pipeline.addConstant("scriptFolder", self.pipeline.getPattern("scriptFolder"))
-        
+
         # PathProperties
-        self.pipeline.addConstant("AngleListener", r"path=%tk_module_path%\templates\AngleListener\angle_listener.py")
-        # self.pipeline.addConstant("ShadowRig", r"path={0}\templates\ShadowRig\shadowrig_hierarchy.py".format(self.modulePath))
-        self.pipeline.addConstant("ShadowRig", None)
-        self.pipeline.addConstant("RotationOrder", r"path=%tk_module_path%\templates\RigSpecs\rotation_order.py")
-        self.pipeline.addConstant("PickWalk", r"path=%tk_module_path%\templates\RigSpecs\pick_walk.py")
+        #ShadowRig
+        self.pipeline.addConstant("shadowrigActive", False, [({"assetType":"props"}, False)])
+        self.pipeline.addConstant("shadowRig", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_hierarchy.py")
+        self.pipeline.addConstant("shadowrigOrients", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_orients.py")
+        self.pipeline.addConstant("shadowrigPreset", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_preset.py")
+        self.pipeline.addConstant("shadowrigRenamings", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_renamings.py")
+        self.pipeline.addConstant("shadowrigRotateorders", r"path=%tk_module_path\templates\ShadowRig\shadowrig_rotateorders.py")
+
+        #Mocap
+        self.pipeline.addConstant("mocapActive", False, [({"assetType":"props"}, False)])
+        self.pipeline.addConstant("yup_zfront_preset", r"path=%tk_module_path%\templates\yup_zfront_preset.py")
+        self.pipeline.addConstant("mocapPrefix", "MayaHIK_")
+        self.pipeline.addConstant("mocapBinding", r"path=%tk_module_path%\templates\Mocap\mocap_binding.py")
+        self.pipeline.addConstant("mocapOrient", r"path=%tk_module_path%\templates\Mocap\mocap_orients.py")
+        self.pipeline.addConstant("mocapSkeletonPath", r"Q:\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma")
+
+        #RigSpecks
+        self.pipeline.addConstant("rotationOrder", {}) # r"path=%tk_module_path%\templates\RigSpecs\rotation_order.py"
+        self.pipeline.addConstant("pickWalk", []) #r"path=%tk_module_path%\templates\RigSpecs\pick_walk.py"
         self.pipeline.addConstant("templatesSpecs", r"path=%tk_module_path%\templates\RigSpecs\assets_specs.py")
         self.pipeline.addConstant("assetTypeToSpec", r"path=%tk_module_path%\templates\RigSpecs\asset_type_to_spec.py")
-        # self.pipeline.addConstant("rigOrients", r"path={0}\templates\RigSpecs\rig_orients.py".format(self.modulePath), [({"assetType":"props"}, None)])
-        self.pipeline.addConstant("rigOrients",None)
-        
+        self.pipeline.addConstant("rigOrients", {}) # r"path=%tk_module_path%\templates\RigSpecs\rig_orients.py", [({"assetType":"props"}, {})]
+
         # Contantes
+        self.pipeline.addConstant("mocapAdditionalMatchers", { #Used in menu items for mocap
+            "Ct_Neck_MCP_0_JNT":"Neck_FK_1",
+            "Ct_Spine_MCP_1_JNT":(("Spine_FK_2",0.5),("Spine_FK_3",0.5)),
+            "Ct_Spine_MCP_2_JNT":(("Spine_FK_3",0.2),("Spine_FK_4",0.8)),
+        },)
+        self.pipeline.addConstant("bonesToFix", [ #Dirty quick fix, should be deprecated and deleted after OSCAR fix
+            "::Left_Rear_LEG_IK_Bone_0",
+            "::Left_Rear_IK3_DogLeg_Bone_0",
+            "::Right_Rear_LEG_IK_Bone_0",
+            "::Right_Rear_IK3_DogLeg_Bone_0",
+            "::Left_Fore_IK3_DogLeg_Bone_0",
+            "::Left_Fore_IK3_DogLeg_Bone_0",
+            "::Left_Fore_LEG_IK_Bone_0",
+            "::Right_Fore_IK3_DogLeg_Bone_0",
+            "::Right_Fore_LEG_IK_Bone_0"
+            ],)
+        
+
+        self.pipeline.addConstant("lodTags", {"LD":"proxy", "MD":"animation", "HD":"deformation"})
         self.pipeline.addConstant("rigGrp", "rig_grp")
-        self.pipeline.addConstant("ctrlSetName", "::*anim_set")
-        self.pipeline.addConstant("geoSetName", "::*geo_set")
-        self.pipeline.addConstant("modNamespace", None)
-        self.pipeline.addConstant("hideSuffix", ["_PRO", "_PXY"])
+        self.pipeline.addConstant("ctrlSetName", "anim_set")
+        self.pipeline.addConstant("geoSetName", "geo_set")
+
+        self.pipeline.addConstant("conformHierarchy", r"path=%tk_module_path%\templates\RigSpecs\rig_conform_hierarchy.py")
+
+        self.pipeline.addConstant("refModActive", False)
+        self.pipeline.addConstant("modNamespace", "MOD")
+
+        self.pipeline.addConstant("hideSuffix", ["_PRO", "_PXY"]) # To be deprecated with benefit of standardisation of mod creation
         self.pipeline.addConstant("controlerWidth", 2.2)
         self.pipeline.addConstant("hilightController", ["Hips","Global_SRT","Local_SRT", "POS_ctrl", "TRAJ_ctrl", "Fly"])
-        self.pipeline.addConstant("excludeTags", [])
+        self.pipeline.addConstant("excludeTags", []) # To be deprecated with benefit of standardisation of mod creation
         self.pipeline.addConstant("dualQuatMeshs", ["*caruncle_layer1"])
+        #OldVersion, To be deprecated:
         self.pipeline.addConstant("deletePatternList", [".+_OSCAR_Attributes",
-                        ".+_TK_CtrlsChannelsDic",
-                        ".+_TK_CtrlsDic",
-                        ".+_TK_KeySets",
-                        ".+_TK_KeySetsTree",
-                        ".+_TK_ParamsDic",
-                        ".+Neutral.+failed",
-                        ".+FKREF",
-                        ".+IKREF",
-                        ".+Leg_Root_Sensor.+",
-                        ".+_Frame",
-                        ".*abcData",
-                        ".+_HandProp_Main_Deform",
-                        ".+_poleHelper"])
+                    ".+_TK_CtrlsChannelsDic",
+                    ".+_TK_CtrlsDic",
+                    ".+_TK_KeySets",
+                    ".+_TK_KeySetsTree",
+                    ".+_TK_ParamsDic",
+                    ".+Neutral.+failed",
+                    ".+FKREF",
+                    ".+IKREF",
+                    ".+Leg_Root_Sensor.+",
+                    ".+_Frame",
+                    ".*abcData",
+                    ".+_HandProp_Main_Deform",
+                    ".+_poleHelper"])
+        
+        self.pipeline.addConstant("optiAttrParentExcept", "|".join(["(.+_OSCAR_Attributes",
+                                                                    ".+_TK_CtrlsChannelsDic",
+                                                                    ".+_TK_CtrlsDic",
+                                                                    ".+_TK_KeySets",
+                                                                    ".+_TK_KeySetsTree",
+                                                                    ".+_TK_ParamsDic",
+                                                                    ".+Neutral.+failed)$"]))
+        self.pipeline.addConstant("optiAttrNameExcept", "|".join(["(.+_Bone0_Init",
+                                                                  ".+_Bone1_Init",
+                                                                  ".+_Bone0_length",
+                                                                  ".+_Bone1_length",
+                                                                  ".+_Scale|timecode_.+",
+                                                                  "mocap_clip_id)$"]))
+        self.pipeline.addConstant("optiObjExcept", "|".join(["(.+_OSCAR_Attributes",
+                                                             ".+_TK_CtrlsChannelsDic",
+                                                             ".+_TK_CtrlsDic",
+                                                             ".+_TK_KeySets",
+                                                             ".+_TK_KeySetsTree",
+                                                             ".+_TK_ParamsDic",
+                                                             ".+Neutral.+failed",
+                                                             ".+FKREF",".+IKREF",
+                                                             ".+Leg_Root_Sensor.+",
+                                                             ".+_Frame",
+                                                             ".*abcData)$"]))
         
         self.resolveProperties()
 

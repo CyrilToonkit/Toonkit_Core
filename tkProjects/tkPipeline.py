@@ -72,9 +72,7 @@ class tkPipeline(object):
     def getPattern(self, inName, inDict=None, inResolve=True):
         assert inName in self._patterns,"Pattern '{0}' does not exists".format(inName)
 
-        dic = self.context.copy()
-        if not inDict is None:
-            dic.update(inDict)
+        dic = inDict.copy() if inDict is not None else {}
 
         rawValue = self._patterns[inName].get(dic)
         rawVariables = tkContext.getVariables(rawValue, inNamesOnly=True)
