@@ -19,3 +19,9 @@ class DccGeter():
     def getNamespace(self):
         tkLogger.error("getNameSpace must be overwrite, you must use specific dcc geter !")
         raise AttributeError
+    
+    def syncDCCProject(self):
+        tkLogger.error("syncDCCProject must be overwrite, you must use specific dcc geter !")
+
+    def checkSyncProject(self):
+        tkLogger.error("checkSyncProject must be overwrite, you must use specific dcc geter !")

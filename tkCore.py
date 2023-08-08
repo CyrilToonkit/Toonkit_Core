@@ -261,6 +261,7 @@ def getTool():
 @verbosed
 def getProject(dccName="Dcc", inName=None):
     global PROJECT
+    global TOOL
     """Get a project object (current one if no name given)
     
     Note : includes a late import of "tkProject" because we have circular dependencies 
@@ -290,6 +291,8 @@ def setProject(dccName="Dcc", inName=None):
 
     if newProj and newProj.name == inName:
         PROJECT = newProj
+        TOOL.options["project"] = newProj.name
+        dcc.syncDCCProject()
     else:
         tkLogger.error("No project matching name '{}', unable to initialize tkProject ({}). Old project returned.".format(inName, newProj))
         del newProj
