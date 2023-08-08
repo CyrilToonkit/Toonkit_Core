@@ -93,13 +93,21 @@ def level():
 
 def debug(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(DEBUG):
+        from .tkCore import reduceStr
+        msg = reduceStr(msg)
         tkLogger._log(DEBUG, msg, args, **kwargs)
 def info(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(INFO):
+        from .tkCore import reduceStr
+        msg = reduceStr(msg)
         tkLogger._log(INFO, msg, args, kwargs)
 def warning(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
+        from .tkCore import reduceStr
+        msg = reduceStr(msg)
         tkLogger._log(WARNING, msg, args, **kwargs)
 def error(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
+        from .tkCore import reduceStr
+        msg = reduceStr(msg)
         tkLogger._log(ERROR, msg, args, **kwargs)

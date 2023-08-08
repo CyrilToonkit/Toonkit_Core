@@ -147,6 +147,45 @@ def getFromDefaults(inDict, inKey, inLastDefault, *args):
     return inLastDefault
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+  ____  _         _             
+ / ___|| |_  _ __(_)_ __   __ _ 
+ | |__ | __|| '__| | '_ \ / _` |
+ \___ || |_ | |  | | | | | (_| |
+ |____||\__||_|  |_|_| |_|\__, |
+                          |___/ 
+
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+STRING_SEPARATORS = [";", ","]
+
+def reduceStr(inStr, inMaxLength=120, inCutStr = " ... "):
+    if not isinstance(inStr, basestring):
+        inStr = str(inStr)
+    if len(inStr) <= inMaxLength:
+        return inStr
+    maxLen = inMaxLength - len(inCutStr)
+    return inStr[:int(maxLen/2)] + inCutStr + inStr[-int(maxLen/2):]
+
+def smartSplit(inScripsPath, inSeparators=STRING_SEPARATORS):
+    scripts = []
+    if isinstance(inScripsPath, (list, tuple)):
+        scripts = []
+        for script in inScripsPath:
+            scripts += smartSplit(script)
+    elif isinstance(inScripsPath, basestring) and len(inScripsPath) > 0:
+        currentSeparator=None
+        for sep in inSeparators:
+            if sep in inScripsPath:
+                currentSeparator = sep
+                break
+        if not currentSeparator is None: 
+            scripts = [x.strip(" ") for x in inScripsPath.split(currentSeparator)]
+        else:
+            scripts = [inScripsPath.strip(" ")]
+    
+    return scripts
+
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   _____         _   _             
  |_   _|__  ___| |_(_)_ __   __ _ 
    | |/ _ \/ __| __| | '_ \ / _` |

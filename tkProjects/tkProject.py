@@ -152,12 +152,6 @@ class tkProject(tkProjectObj):
     def indentStr(self, inStr, inIndentLevel=1, inIndentStr = " ", inIndentAmout=4):
         return (inIndentStr * inIndentAmout * inIndentLevel) + str(inStr)
     
-    def reduceStr(self, inStr, inMaxLength=120, inCutStr = " ... "):
-        if len(inStr) <= inMaxLength:
-            return inStr
-        maxLen = inMaxLength - len(inCutStr)
-        return inStr[:int(maxLen/2)] + inCutStr + inStr[-int(maxLen/2):]
-
     def help(self, inContext=None):
         lines = []
         indentLevel = 0
@@ -169,24 +163,24 @@ class tkProject(tkProjectObj):
         indentLevel +=1
         for patternName, patternData in sorted(list(self.pipeline._patterns.items()), key= lambda kvPair: kvPair[0]):
             patternValue = self.pipeline.getPattern(patternName, inContext)
-            lines.append(self.indentStr("{patternName} : {patternValue}".format(patternName=patternName, patternValue=patternValue), indentLevel))
+            lines.append(self.indentStr("{patternName} : {patternValue}".format(patternName=patternName, patternValue=tkCore.reduceStr(patternValue)), indentLevel))
             if len(patternData._overrides) > 0 and inContext == None:
                 indentLevel +=1
                 lines.append(self.indentStr("Overrides :", indentLevel))
                 for overrides in  patternData._overrides:
-                    lines.append(self.indentStr("- {0} : {1}".format(*overrides), indentLevel))
+                    lines.append(self.indentStr("- {0} : {1}".format(*[tkCore.reduceStr(x) for x in overrides]), indentLevel))
                 indentLevel -=1
         indentLevel -=1
         lines.append(self.indentStr("Project Constants : ", indentLevel))
         indentLevel +=1
         for constantName, constantData in sorted(list(self.pipeline._constants.items()), key= lambda kvPair: kvPair[0]):
             constantValue = constantData.get(inContext)
-            lines.append(self.indentStr("{constantName} : {constantValue}".format(constantName=constantName, constantValue=constantValue), indentLevel))
+            lines.append(self.indentStr("{constantName} : {constantValue}".format(constantName=constantName, constantValue=tkCore.reduceStr(constantValue)), indentLevel))
             if len(constantData._overrides) > 0 and inContext == None:
                 indentLevel += 1
                 lines.append(self.indentStr("Overrides : ", indentLevel))
                 for overrides in constantData._overrides:
-                    lines.append(self.indentStr("- {0} : {1}".format(*overrides), indentLevel))
+                    lines.append(self.indentStr("- {0} : {1}".format(*[tkCore.reduceStr(x) for x in overrides]), indentLevel))
                 indentLevel -=1
         indentLevel -=1
         
@@ -268,7 +262,7 @@ class tkProject(tkProjectObj):
             tkLogger.error(e)
             return None
 
-    def getPropertie(self, inPropertie, inContext=None):
+    def getProperty(self, inPropertie, inContext=None):
         if inPropertie in self.pipeline._patterns:
             return self.pipeline.getPattern(inPropertie, inContext)
         elif inPropertie in self.pipeline._constants:

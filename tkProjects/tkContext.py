@@ -63,6 +63,11 @@ import re
 from .. import tkLogger
 from .. import tkCore as tc
 
+try: basestring
+except: 
+    import six
+    basestring = six.string_types
+
 __author__ = "Cyril GIBAUD - Toonkit"
 
 DRIVE_SEP = u":"
@@ -202,6 +207,45 @@ def expandVariables(inPattern, inVariables=None):
             parseAblePath = parseAblePath.replace(variable, "{{{0}}}".format(encloseVariable(safeVariable)))
 
     return parseAblePath.format(**inVariables)
+
+def expandIterablesVariables(inIterable, inVariables={}):
+    if isinstance(inIterable, (tuple, list)):
+        isTuple=False
+        iterable = inIterable[:]
+        if isinstance(iterable, tuple):
+            iterable = list(iterable)
+            isTuple = True
+        for nb, item in enumerate(iterable):
+            if isinstance(item, basestring):
+                iterable[nb] = expandVariables(item, inVariables)
+            if isinstance(item, (tuple, list)):
+                iterable[nb] = expandIterablesVariables(item, inVariables)
+            if isinstance(item, dict):
+                iterable[nb] = expandDictionaryVariables(item, inVariables)
+        if isTuple:
+            iterable = tuple(iterable)
+    return iterable
+
+def expandDictionaryVariables(inDict, inVariables={}):
+    if isinstance(inDict, dict):
+        expandDict = inDict.copy()
+        for key, value in expandDict.items():
+            if isinstance(value, basestring):
+                expandDict[key] = expandVariables(value, inVariables)
+            if isinstance(value, (tuple, list)):
+                expandDict[key] = expandIterablesVariables(value, inVariables)
+            if isinstance(value, dict):
+                expandDict[key] = expandDictionaryVariables(value, inVariables)
+    return expandDict
+
+def expandAllVariables(inVar, inVariables={}):
+    if isinstance(inVar, basestring):
+        inVar = expandVariables(inVar, inVariables)
+    elif isinstance(inVar, (tuple, list)):
+        inVar = expandIterablesVariables(inVar, inVariables)
+    elif isinstance(inVar, dict):
+        inVar = expandDictionaryVariables(inVar, inVariables)
+    return inVar
 
 def regroupKnownChunks(inSplit):
     splitPathRegrouped = []
