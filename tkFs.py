@@ -207,3 +207,13 @@ def getModuleFromPath(inPath):
     if dirName in sys.path:
         sys.path.remove(dirName)
     return mod
+
+def getFileContents(inPath, readlignes=False):
+    content = None
+    if os.path.isfile(inPath):
+        with open(inPath, "r") as file:
+            if readlignes:
+                content = [x.rstrip(os.linesep) for x in file.readlines()]
+            else:
+                content = file.read()
+    return content

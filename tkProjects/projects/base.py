@@ -27,7 +27,6 @@ from ..tkProject import tkProject
 from .. import tkContext as ctx
 from ... import tkCore as tkc
 import os
-import tkRig
 
 class base(tkProject):
     def __init__(self, *args, **kwargs):
@@ -91,6 +90,11 @@ class base(tkProject):
         self.pipeline.addConstant("rigOrients", {}) # r"path=%tk_module_path%\templates\RigSpecs\rig_orients.py", [({"assetType":"props"}, {})]
 
         # Contantes
+        self.pipeline.addConstant("preConformScripts", None)
+        self.pipeline.addConstant("postConformScripts", None)
+        self.pipeline.addConstant("preReleaseScripts", None)
+        self.pipeline.addConstant("postReleaseScripts", None)
+        
         self.pipeline.addConstant("mocapAdditionalMatchers", { #Used in menu items for mocap
             "Ct_Neck_MCP_0_JNT":"Neck_FK_1",
             "Ct_Spine_MCP_1_JNT":(("Spine_FK_2",0.5),("Spine_FK_3",0.5)),
@@ -110,9 +114,22 @@ class base(tkProject):
         
 
         self.pipeline.addConstant("lodTags", {"LD":"proxy", "MD":"animation", "HD":"deformation"})
-        self.pipeline.addConstant("rigGrp", "rig_grp")
+        self.pipeline.addConstant("geometryGrp", "Geometry_GRP")
         self.pipeline.addConstant("ctrlSetName", "anim_set")
         self.pipeline.addConstant("geoSetName", "geo_set")
+        self.pipeline.addConstant("hiLockedTransformAttrs", [
+            {"name":"tx", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"ty", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"tz", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"rx", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"ry", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"rz", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"sx", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"sy", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"sz", "type":"float", "value":None, "keyable":False, "lock":True},
+            {"name":"visibility", "type":"bool", "value":None, "lock":True},])
+        
+        self.pipeline.addConstant("mocapDrivenChannels", []) #r"path=%tk_module_path%\templates\RigSpecs\baked_attrs.py"
 
         self.pipeline.addConstant("conformHierarchy", r"path=%tk_module_path%\templates\RigSpecs\rig_conform_hierarchy.py")
 

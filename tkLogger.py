@@ -21,6 +21,7 @@
 """
 
 import logging
+from . import tkSound
 import os
 
 CRITICAL = 50
@@ -38,7 +39,7 @@ _levelToName = {
     DEBUG: 'DEBUG',
     NOTSET: 'NOTSET',
 }
-
+LOGS_HISTORIC = []
 # Create the Tk logger or get if it allrady exist, then set level to NotSet
 tkLogger = logging.getLogger("tkLogger")
 if tkLogger.level == 0:
@@ -96,18 +97,23 @@ def debug(msg, *args, **kwargs):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkLogger._log(DEBUG, msg, args, **kwargs)
+        LOGS_HISTORIC.append(msg)
 def info(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(INFO):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkLogger._log(INFO, msg, args, kwargs)
+        LOGS_HISTORIC.append(msg)
 def warning(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkLogger._log(WARNING, msg, args, **kwargs)
+        LOGS_HISTORIC.append(msg)
 def error(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
+        tkSound.playError()
         tkLogger._log(ERROR, msg, args, **kwargs)
+        LOGS_HISTORIC.append(msg)
