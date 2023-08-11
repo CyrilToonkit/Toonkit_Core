@@ -26,4 +26,3 @@ from .base import base
 class default(base):
     def __init__(self, *args, **kwargs):
         super(default, self).__init__(*args, **kwargs)
-        self.name = "default"

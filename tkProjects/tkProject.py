@@ -121,7 +121,7 @@ class tkProject(tkProjectObj):
 
         if inName + ".py" in subFiles:
             project = tkProject._get(inName)
-            tkLogger.debug("Class instanced correctly : ", str(project))
+            tkLogger.debug("Class instanced correctly : {}".format(project))
         else:
             if not isinstance(inPaths, (list, tuple)):
                 inPaths = [inPaths]
@@ -132,11 +132,6 @@ class tkProject(tkProjectObj):
                         module = tkFs.getModuleFromPath(os.path.join(path, inName))
                         if module:
                             project = getattr(module, inName)
-
-        if project is None:
-            tkLogger.warning("No project given or found, default used !")
-            project = tkProject._get("default")
-
         if project is None and len(subFiles) > 0:
             for subFile in subFiles:
                 if not subFile.endswith(".py"):
@@ -262,7 +257,9 @@ class tkProject(tkProjectObj):
             tkLogger.error(e)
             return None
 
-    def getProperty(self, inPropertie, inContext=None):
+    def getProperty(self, inPropertie, inContext=None, inUseBaseContext=True):
+        if inUseBaseContext is True and inContext is None:
+            inContext = self.pipeline.baseContext.copy()
         if inPropertie in self.pipeline._patterns:
             return self.pipeline.getPattern(inPropertie, inContext)
         elif inPropertie in self.pipeline._constants:
@@ -272,19 +269,33 @@ class tkProject(tkProjectObj):
         else:
             return None
 
-    def detectContext(self, path=None, pattern=None, inUpdateContext=False, inForceResolve=False):
+    def detectContext(self, path=None, pattern=None, inUpdateContext=False):
+        # Copy base context (minimal versions of the context)
+        # if Path is None, get scene name
+        # if scene name is "untitled" set path to None
+        # after that, if path is not None, detect context with this path
+        # after that, if path is None, use pattern to detect context
+        # if pattern is None, try with assetRawPattern
+
+        # After all of that, if patternName detected from path and match with the given path,
+        # check unresolved variable in patternName, and update context
+
+        # If param updateContext set to True => Update the actual context by the detected one.
+
+        # To deprecated : inForceResolve 
         context = self.pipeline.baseContext.copy()
         patternName = None
-        if path == None:
+        if path is None:
             path = self.dcc.getSceneName()
+        if not path is None and len(path) == 0:
+            path = None
         if not path is None:
             detectedContext = self.pipeline.detectContext(path, pattern, variables=context)
             pattern = detectedContext[0]
             patternName = detectedContext[1]
-        elif pattern is None:
-            tkLogger.error("Could not find matching pattern of this asset in the current project !")
-            return None
         elif path is None:
+            if pattern is None:
+                pattern = self.getProperty("assetRawPattern", context)
             unresolved = ctx.getVariables(pattern, True)
             dccBasedContext = self.dcc.detect_context(inVariable=unresolved, inPattern=pattern, inContext=context)
             if dccBasedContext == context:
@@ -295,10 +306,9 @@ class tkProject(tkProjectObj):
         else:
             tkLogger.error("Could not find matching pattern of this asset in the current project !")
             return None
-
-        if (patternName and ctx.match(self.pipeline.getPattern(patternName, context), path)):
+        if (patternName and ctx.match(self.getProperty(patternName, context), path)):
             unresolved = ctx.getVariables(pattern, True)
-            if not unresolved == [] or inForceResolve:
+            if not unresolved == []:
                 tkLogger.info("Pattern unresolved or inForceResolve option is True !")
                 dccBasedContext = self.dcc.detect_context(unresolved, pattern, context)
                 context.update(dccBasedContext)

@@ -50,18 +50,17 @@ class base(tkProject):
         self.pipeline.addPattern("OSCARProject", r"Z:\ToonKit\OSCAR\Projects\{projectName}")
         self.pipeline.addPattern("releasePattern", r"{IOProject}\DELIVERY\{assetType}\{name:.+}\{name:.+}_{lodTag}_v{version:[0-9]{3}<-1>}.ma")
         self.pipeline.addPattern("deltaFolder", r"{IOProject}\Interne\DELTAS")
+        self.pipeline.addPattern("assetRigPattern", r"{OSCARProject}\Assets\{name:.+}\{name:.+}.ma")
+        self.pipeline.addPattern("assetMasterPattern", r"{OSCARProject}\Assets\{name:.+}\{name:.+}_MASTER.ma")
+        self.pipeline.addPattern("assetMasterRawPattern", r"{OSCARProject}\Assets\{name:.+}\{name:.+}_MASTER_RAW.ma")
         self.pipeline.addPattern("assetAnPattern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}.ma")
         self.pipeline.addPattern("assetRawPattern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}_RAW.ma")
-        self.pipeline.addPattern("assetMasterPattern", r"{OSCARProject}\Assets\{name:.+}_MASTER.ma")
-        self.pipeline.addPattern("assetMasterRawPattern", r"{OSCARProject}\Assets\{name:.+}_MASTER_RAW.ma")
-        self.pipeline.addPattern("assetRigPattern", r"{OSCARProject}\Assets\{name:.+}\{name:.+}.ma")
         self.pipeline.addPattern("modelingPattern", r"Q:\{projectNumber:[0-9]{4}_{projectName}\SOURCE\{name:.+}_v{modVersion:[0-9]{3}<-1>}.abc") # <= To be refered to the SOURCE dir 
         self.pipeline.addPattern("scriptFolder", r"{OSCARProject}\Scripts") # Unused for now
         self.setOverwrite([("Z:", "Q:")])
         self.pipeline.context = {"projectName": self.name, "repo":"local"}
 
         ### __INIT__Constants__ ###    
-        
         self.pipeline.addConstant("baseContextKeys", ["projectName", "repo"])
         self.pipeline.baseContext = {key:value for (key, value) in self.pipeline.context.items() if key in self.baseContextKeys}
 
@@ -111,7 +110,6 @@ class base(tkProject):
             "::Right_Fore_IK3_DogLeg_Bone_0",
             "::Right_Fore_LEG_IK_Bone_0"
             ],)
-        
 
         self.pipeline.addConstant("lodTags", {"LD":"proxy", "MD":"animation", "HD":"deformation"})
         self.pipeline.addConstant("geometryGrp", "Geometry_GRP")

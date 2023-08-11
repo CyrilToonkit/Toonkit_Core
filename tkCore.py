@@ -90,7 +90,7 @@ def verbosed(func):
         except Exception as e:
             end = time.time()
             duration = end - start
-            tkLogger.debug("{0}.{1}({2}) took {3:.4f}s and Failed Succesfuly! ".format(func.__module__, func.__name__, ",".join(argsList), duration))
+            tkLogger.debug("{0}.{1}({2}) took {3:.4f}s and Failed.".format(func.__module__, func.__name__, ",".join(argsList), duration))
             raise e
         end = time.time()
         duration = end - start
@@ -296,6 +296,10 @@ def setProject(dccName="Dcc", inName=None):
     else:
         tkLogger.error("No project matching name '{}', unable to initialize tkProject ({}). Old project returned.".format(inName, newProj))
         del newProj
+        if oldProject == None:
+            tkLogger.warning("No old project found, Default used!")
+            oldProject = getProject("maya", "default")
+            dcc.syncDCCProject()
         PROJECT = oldProject
     return PROJECT
 

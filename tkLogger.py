@@ -102,25 +102,25 @@ def level():
 def debug(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(DEBUG):
         from .tkCore import reduceStr
-        msg = reduceStr(msg)
+        msg = reduceStr(msg, 250)
         tkLogger._log(DEBUG, msg, args, **kwargs)
 
 def info(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(INFO):
         from .tkCore import reduceStr
-        msg = reduceStr(msg)
+        msg = reduceStr(msg, 250)
         tkLogger._log(INFO, msg, args, kwargs)
 
 def warning(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
         from .tkCore import reduceStr
-        msg = reduceStr(msg)
+        msg = reduceStr(msg, 250)
         tkLogger._log(WARNING, msg, args, **kwargs)
 
 def error(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
         from .tkCore import reduceStr
-        msg = reduceStr(msg)
+        msg = reduceStr(msg, 250)
         tkSound.playError()
         tkLogger._log(ERROR, msg, args, **kwargs)
 
@@ -171,13 +171,13 @@ class LoggerUI(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(LoggerUI, self).__init__(*args,**kwargs)
         self.buildUI()
-        self.objectName = "LoggerUI"
+        self.objectName = "tkLoggerUI"
 
     def windowIconText(self):
         return self.objectName
 
     def buildUI(self):
-        self.setWindowTitle("Logger UI")
+        self.setWindowTitle("Tk Logger UI")
         self.resize(800, 480)
         widget = QWidget()
         self.setCentralWidget(widget)
@@ -203,7 +203,7 @@ def loadLoggerUI():
         QtWindow = None
         for widget in allWidgets:
             try:
-                if widget.windowIconText() == "LoggerUI":
+                if widget.windowIconText() == "tkLoggerUI":
                     window = widget
                 if widget.windowIconText() =="Maya":
                     QtWindow = widget
