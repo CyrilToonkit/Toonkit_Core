@@ -19,9 +19,17 @@
     along with Toonkit Module Lite.  If not, see <http://www.gnu.org/licenses/>
 -------------------------------------------------------------------------------
 """
-
+from qtpy.QtWidgets import (
+    QMainWindow, 
+    QWidget, 
+    QApplication, 
+    QVBoxLayout, 
+    QPlainTextEdit,
+    )
+from qtpy import QtGui
+import tkSound
 import logging
-from . import tkSound
+import sys
 import os
 
 CRITICAL = 50
@@ -39,7 +47,7 @@ _levelToName = {
     DEBUG: 'DEBUG',
     NOTSET: 'NOTSET',
 }
-LOGS_HISTORIC = []
+
 # Create the Tk logger or get if it allrady exist, then set level to NotSet
 tkLogger = logging.getLogger("tkLogger")
 if tkLogger.level == 0:
@@ -91,29 +99,118 @@ def removeHandlers():
 def level():
     return _levelToName.get(tkLogger.level)
 
-
 def debug(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(DEBUG):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkLogger._log(DEBUG, msg, args, **kwargs)
-        LOGS_HISTORIC.append(msg)
+
 def info(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(INFO):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkLogger._log(INFO, msg, args, kwargs)
-        LOGS_HISTORIC.append(msg)
+
 def warning(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkLogger._log(WARNING, msg, args, **kwargs)
-        LOGS_HISTORIC.append(msg)
+
 def error(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
         from .tkCore import reduceStr
         msg = reduceStr(msg)
         tkSound.playError()
         tkLogger._log(ERROR, msg, args, **kwargs)
-        LOGS_HISTORIC.append(msg)
+
+
+class CustomFormatter(logging.Formatter):
+    FORMATS = {
+        ERROR:   ("%(asctime)s - [%(levelname)-8s] [%(filename)s:%(lineno)d] %(message)s", QtGui.QColor(220,0,0)),
+        DEBUG:   ("%(asctime)s - [%(levelname)-8s] [%(filename)s:%(lineno)d] %(message)s", QtGui.QColor(0,200,0)),
+        INFO:    ("%(asctime)s - [%(levelname)-8s] [%(filename)s:%(lineno)d] %(message)s", QtGui.QColor(0,175,175)),
+        WARNING: ('%(asctime)s - [%(levelname)-8s] [%(filename)s:%(lineno)d] %(message)s', QtGui.QColor(175,175,0))
+    }
+
+    def format( self, record ):
+        isStyle = False
+        try:
+            last_fmt = self._style._fmt
+            isStyle = True
+        except:
+            last_fmt = self._fmt
+        
+        opt = CustomFormatter.FORMATS.get(record.levelno)
+        if opt:
+            fmt, color = opt
+            self._fmt  = "<font color=\"{}\">{}</font>".format(QtGui.QColor(color).name(),fmt)
+            if isStyle:
+                self._style._fmt = self._fmt
+        res = logging.Formatter.format( self, record )
+        self._fmt = last_fmt
+        if isStyle:
+            self._style._fmt = last_fmt
+        return res
+
+
+class QPlainTextEditLogger(logging.Handler):
+    def __init__(self, parent=None):
+        super(QPlainTextEditLogger, self).__init__()
+        self.widget = QPlainTextEdit(parent)
+        self.widget.setReadOnly(True)    
+
+    def emit(self, record):
+        msg = self.format(record)
+        self.widget.appendHtml(msg)
+        scrollbar = self.widget.verticalScrollBar()
+        scrollbar.setValue(scrollbar.maximum())
+
+
+class LoggerUI(QMainWindow):
+    def __init__(self, *args, **kwargs):
+        super(LoggerUI, self).__init__(*args,**kwargs)
+        self.buildUI()
+        self.objectName = "LoggerUI"
+
+    def windowIconText(self):
+        return self.objectName
+
+    def buildUI(self):
+        self.setWindowTitle("Logger UI")
+        self.resize(800, 480)
+        widget = QWidget()
+        self.setCentralWidget(widget)
+        layout = QVBoxLayout()
+        widget.setLayout(layout)
+
+
+        self.textField = QPlainTextEditLogger()
+        tkLogger.addHandler(self.textField)
+        self.textField.setFormatter(CustomFormatter(datefmt='%d.%m.%y %H:%M:%S'))
+        layout.addWidget(self.textField.widget)
+        self.menuBar().addAction("Clear logs", self.textField.widget.clear)
+
+def loadLoggerUI():
+    window = None
+    if '__main__' == __name__:
+        app = QApplication(sys.argv)
+        window = LoggerUI()
+        window.show()
+        sys.exit(app.exec_())
+    else:
+        allWidgets = QApplication.allWidgets()
+        QtWindow = None
+        for widget in allWidgets:
+            try:
+                if widget.windowIconText() == "LoggerUI":
+                    window = widget
+                if widget.windowIconText() =="Maya":
+                    QtWindow = widget
+            except:pass
+        if not QtWindow is None:
+            if window is None:
+                window = LoggerUI(QtWindow)
+            window.close()
+            window.show()
+    return window
