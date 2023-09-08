@@ -57,7 +57,9 @@ class base(tkProject):
         self.pipeline.addPattern("assetRawPattern", r"{OSCARProject}\Assets\{name:.+}\AN\{name:.+}_RAW.ma")
         self.pipeline.addPattern("modelingPattern", r"Q:\{projectNumber:[0-9]{4}_{projectName}\SOURCE\{name:.+}_v{modVersion:[0-9]{3}<-1>}.abc") # <= To be refered to the SOURCE dir 
         self.pipeline.addPattern("scriptFolder", r"{OSCARProject}\Scripts") # Unused for now
+        
         self.setOverwrite([("Z:", "Q:")])
+        
         self.pipeline.context = {"projectName": self.name, "repo":"local"}
 
         ### __INIT__Constants__ ###    
@@ -68,10 +70,11 @@ class base(tkProject):
         #ShadowRig
         self.pipeline.addConstant("shadowrigActive", False, [({"assetType":"props"}, False)])
         self.pipeline.addConstant("shadowRig", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_hierarchy.py")
-        self.pipeline.addConstant("shadowrigOrients", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_orients.py")
         self.pipeline.addConstant("shadowrigPreset", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_preset.py")
-        self.pipeline.addConstant("shadowrigRenamings", r"path=%tk_module_path%\templates\ShadowRig\shadowrig_renamings.py")
-        self.pipeline.addConstant("shadowrigRotateorders", r"path=%tk_module_path\templates\ShadowRig\shadowrig_rotateorders.py")
+        self.pipeline.addConstant("shadowrigOrients", None) #r"path=%tk_module_path%\templates\ShadowRig\shadowrig_orients.py"
+        self.pipeline.addConstant("shadowrigRenamings", None) #r"path=%tk_module_path%\templates\ShadowRig\shadowrig_renamings.py"
+        self.pipeline.addConstant("shadowrigRotateorders", None) #r"path=%tk_module_path\templates\ShadowRig\shadowrig_rotateorders.py"
+        self.pipeline.addConstant("shadowrigForcedInfluences", ["TK_Body_Main_Deform"])
 
         #Mocap
         self.pipeline.addConstant("mocapActive", False, [({"assetType":"props"}, False)])
@@ -81,9 +84,9 @@ class base(tkProject):
         self.pipeline.addConstant("mocapOrient", r"path=%tk_module_path%\templates\Mocap\mocap_orients.py")
         self.pipeline.addConstant("mocapSkeletonPath", r"Q:\Bank\Mocap\SkeletalModel_Biped_ToonkitHIK.ma")
 
-        #RigSpecks
+        #RigSpecs
         self.pipeline.addConstant("rotationOrder", {}) # r"path=%tk_module_path%\templates\RigSpecs\rotation_order.py"
-        self.pipeline.addConstant("pickWalk", []) #r"path=%tk_module_path%\templates\RigSpecs\pick_walk.py"
+        self.pipeline.addConstant("pickWalk", r"path=%tk_module_path%\templates\RigSpecs\pick_walk.py")
         self.pipeline.addConstant("templatesSpecs", r"path=%tk_module_path%\templates\RigSpecs\assets_specs.py")
         self.pipeline.addConstant("assetTypeToSpec", r"path=%tk_module_path%\templates\RigSpecs\asset_type_to_spec.py")
         self.pipeline.addConstant("rigOrients", {}) # r"path=%tk_module_path%\templates\RigSpecs\rig_orients.py", [({"assetType":"props"}, {})]

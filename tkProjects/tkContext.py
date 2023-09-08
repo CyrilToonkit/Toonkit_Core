@@ -384,7 +384,8 @@ def translate(inSourcePath, inSourcePattern, inDestinationPattern, inAcceptUndef
 def resolvePath(inPath, inVariables=None, inAcceptUndefinedResults=False, inVerbose=False, inRootExists=False):
     results = collectPath(inPath, inVariables, inMaxResults=1, inRootExists=inRootExists, inAcceptUndefinedResults=inAcceptUndefinedResults, inVerbose=inVerbose)
     if len(results) > 0:
-        inVariables = results[0][1]
+        if not inVariables is None:
+            inVariables.update(results[0][1])
         return results[0][0]
 
     return None
