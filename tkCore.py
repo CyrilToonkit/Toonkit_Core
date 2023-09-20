@@ -27,13 +27,19 @@ __author__ = "Cyril GIBAUD - Toonkit"
 import inspect
 import time
 import sys
-from functools import partial
+from functools import partial, wraps
 from timeit import timeit
 try: basestring
 except: basestring=str
+import traceback
 
 from . import tkLogger
 from .tkToolOptions.ToonkitCore import ToonkitCore
+
+if sys.version_info[0] >= 3:
+    import queue
+else:
+    import Queue as queue
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
    ____                _              _       
@@ -50,6 +56,8 @@ OPERATORS = ["==", "!=", ">", "<"]
 
 LINESEP = "\n"
 
+LAST_STACK = queue.Queue()
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   ____                           _                 
  |  _ \  ___  ___ ___  _ __ __ _| |_ ___  _ __ ___ 
@@ -62,6 +70,7 @@ LINESEP = "\n"
 def verbosed(func):
     """logLevel/debug decorator"""
 
+    @wraps(func)
     def wrapper(*args, **kwargs):
         if tkLogger.level() != "DEBUG":
             return func(*args, **kwargs)
@@ -101,6 +110,19 @@ def verbosed(func):
 
     return wrapper
 
+def catchexp(func):
+    """traceback catcher decorator"""
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        try:
+            rslt = func(self, *args, **kwargs)
+        except Exception as e:
+            LAST_STACK.put(traceback.format_exc())
+            raise e
+        return rslt
+
+    return wrapper
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   ____  _      _   
  |  _ \(_) ___| |_ 

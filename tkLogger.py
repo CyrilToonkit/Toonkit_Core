@@ -27,7 +27,7 @@ from qtpy.QtWidgets import (
     QPlainTextEdit,
     )
 from qtpy import QtGui
-import tkSound
+from . import tkSound
 import logging
 import sys
 import os
@@ -38,6 +38,8 @@ WARNING = 30
 INFO = 20
 DEBUG = 10
 NOTSET = 0
+
+MSG_MAXLEN = 500
 
 _levelToName = {
     CRITICAL: 'CRITICAL',
@@ -102,26 +104,26 @@ def level():
 def debug(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(DEBUG):
         from .tkCore import reduceStr
-        msg = reduceStr(msg, 250)
+        msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(DEBUG, msg, args, **kwargs)
 
 def info(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(INFO):
         from .tkCore import reduceStr
-        msg = reduceStr(msg, 250)
+        msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(INFO, msg, args, kwargs)
 
 def warning(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
         from .tkCore import reduceStr
-        msg = reduceStr(msg, 250)
+        msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(WARNING, msg, args, **kwargs)
 
 def error(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
         from .tkCore import reduceStr
-        msg = reduceStr(msg, 250)
-        tkSound.playError()
+        msg = reduceStr(msg, MSG_MAXLEN)
+        tkSound.error()
         tkLogger._log(ERROR, msg, args, **kwargs)
 
 
@@ -158,6 +160,7 @@ class QPlainTextEditLogger(logging.Handler):
     def __init__(self, parent=None):
         super(QPlainTextEditLogger, self).__init__()
         self.widget = QPlainTextEdit(parent)
+        self.widget.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap);
         self.widget.setReadOnly(True)    
 
     def emit(self, record):

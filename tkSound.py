@@ -19,10 +19,15 @@ MB_ICONEXCLAMATION = 48
 MB_ICONHAND = 16
 MB_ICONQUESTION = 32
 
-def PlaySound(sound, flags=0):
+def PlaySound(sound, flags=SND_ALIAS | SND_ASYNC):
     if not winsound is None:
         winsound.PlaySound(sound, flags)
 
-def playError():
-    if not winsound is None:
-        winsound.PlaySound("*", SND_ASYNC)
+def error():
+    PlaySound("SystemHand")
+
+def exit():
+    PlaySound("SystemExit")
+
+def question():
+    PlaySound("SystemQuestion")
