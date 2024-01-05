@@ -270,6 +270,8 @@ def match(inPattern, inString, inVariables=None):
     inPattern = expandVariables(inPattern, inVariables)
     variables = re.findall(RE_VARIABLES, inPattern)
 
+    managedVariables = []
+
     if len(variables) > 0:
         if inVariables == None:
             inVariables = {}
@@ -277,21 +279,27 @@ def match(inPattern, inString, inVariables=None):
         pattern = inPattern
         for variable in variables:
             variableName, variableReg = splitReVariable(variable)
-            if variableReg == None:
-                variableReg = ".+"
+
+            if variableName in managedVariables:
+                pattern = pattern.replace(variable, "($REGESCAPE$"+ str(managedVariables.index(variableName) + 1)+"{1})", 1)
             else:
-                searchIndex = re.search("<(.+)>", variableReg)
-                #Search if we have a custom sorting directive (index)
-                if searchIndex:
-                    index=searchIndex.groups()[0]
-                    variableReg = variableReg.replace("<"+index+">", "")
 
-            if "\\" in variableReg:
-                tkLogger.warning ("Please don't use escaped characters in variables regular expressions !")
+                if variableReg == None:
+                    variableReg = ".+"
+                else:
+                    searchIndex = re.search("<(.+)>", variableReg)
+                    #Search if we have a custom sorting directive (index)
+                    if searchIndex:
+                        index=searchIndex.groups()[0]
+                        variableReg = variableReg.replace("<"+index+">", "")
 
-            pattern = pattern.replace(variable, "("+variableReg+")")
+                if "\\" in variableReg:
+                    tkLogger.warning ("Please don't use escaped characters in variables regular expressions !")
 
-        curReg = re.compile(pattern.replace('\\', r'\\'), re.IGNORECASE)
+                pattern = pattern.replace(variable, "("+variableReg+")", 1)
+                managedVariables.append(variableName)
+
+        curReg = re.compile(pattern.replace('\\', r'\\').replace('$REGESCAPE$', '\\'), re.IGNORECASE)
         tkLogger.debug("expression : {0}, path: {1}".format(pattern, inString))
         matchObj = re.search(curReg, inString)
 

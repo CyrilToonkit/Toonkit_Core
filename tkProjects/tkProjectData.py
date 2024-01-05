@@ -19,6 +19,9 @@
     along with Toonkit Module Lite.  If not, see <http://www.gnu.org/licenses/>
 -------------------------------------------------------------------------------
 """
+import six
+basestring = six.string_types
+from . import tkContext as ctx
 
 __author__ = "Cyril GIBAUD - Toonkit"
 
@@ -40,5 +43,6 @@ class tkProjectData(object):
                         matches = False
                         break
                 if matches:
-                    return overrideValue
-        return self._value
+                    return ctx.expandAllVariables(overrideValue, inDict)
+
+        return ctx.expandAllVariables(self._value, inDict or {})
