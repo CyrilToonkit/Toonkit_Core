@@ -180,7 +180,7 @@ def getFromDefaults(inDict, inKey, inLastDefault, *args):
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 STRING_SEPARATORS = [";", ","]
 
-def reduceStr(inStr, inMaxLength=120, inCutStr = " ... "):
+def reduceStr(inStr, inMaxLength=500, inCutStr = " ... "):
     if not isinstance(inStr, basestring):
         inStr = str(inStr)
     if len(inStr) <= inMaxLength:

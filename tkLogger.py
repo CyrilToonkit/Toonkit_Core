@@ -39,7 +39,7 @@ INFO = 20
 DEBUG = 10
 NOTSET = 0
 
-MSG_MAXLEN = 500
+MSG_MAXLEN = 800
 
 _levelToName = {
     CRITICAL: 'CRITICAL',
