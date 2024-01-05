@@ -181,7 +181,9 @@ class base(tkProject):
                                                              ".+FKREF",".+IKREF",
                                                              ".+Leg_Root_Sensor.+",
                                                              ".+_Frame",
-                                                             ".*abcData)$"]))
+                                                             ".*abcData",
+                                                             ".+_HandProp_Main_Deform",
+                                                             ".+_poleHelper)$"]))
         
         self.resolveProperties()
 
