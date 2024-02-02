@@ -38,6 +38,7 @@ WARNING = 30
 INFO = 20
 DEBUG = 10
 NOTSET = 0
+VERBOSE = -10
 
 MSG_MAXLEN = 800
 
@@ -48,12 +49,15 @@ _levelToName = {
     INFO: 'INFO',
     DEBUG: 'DEBUG',
     NOTSET: 'NOTSET',
+    VERBOSE: 'VERBOSE',
 }
 
 # Create the Tk logger or get if it allrady exist, then set level to NotSet
 tkLogger = logging.getLogger("tkLogger")
 if tkLogger.level == 0:
-    tkLogger.setLevel("NOTSET")
+    tkLogger.setLevel(0)
+
+VERBOSED=False
 
 def makedirs(inPath):
     """Create directory structure is it does not exists already (can take a file path)"""
@@ -82,16 +86,32 @@ def setLogsFiles(path):
     return handlers if len(handlers) !=0 else [fileHandler]
 
 # Set log level for tkLogger and his relatade files handlers.
-def setLevel(level):
-    tkLogger.setLevel(level)
-    if isinstance(level, int):
-        tkLogger.debug("Logger level set to {}".format(_levelToName[level]))
+def setLevel(inLevel):
+    global VERBOSED
+    outLevel = inLevel
+    if isinstance(outLevel, int):
+        if outLevel == -10:
+            outLevel = 10
+            VERBOSED = True
+        else:
+            VERBOSED = False
+
+        tkLogger.setLevel(outLevel)
+        tkLogger.debug("Logger level set to {}".format(level()))
     else:
-        tkLogger.debug("Logger level set to {}".format(level))
+        if outLevel == _levelToName[-10]:
+            outLevel = _levelToName[10]
+            VERBOSED = True
+        else:
+            VERBOSED = False
+
+        tkLogger.setLevel(outLevel)
+        tkLogger.debug("Logger level set to {}".format(level()))
+
     handlers = tkLogger.handlers
     if len(handlers) !=0:
         for handler in handlers:
-            handler.setLevel(level)
+            handler.setLevel(outLevel)
 
 # Remove all log file handlers of the tkLogger
 def removeHandlers():
@@ -99,33 +119,36 @@ def removeHandlers():
         tkLogger.removeHandler(hdlr)
 
 def level():
-    return _levelToName.get(tkLogger.level)
+    return "VERBOSE" if VERBOSED else _levelToName.get(tkLogger.level)
 
-def debug(msg, *args, **kwargs):
+def debug(msg, *args, inRaw=False, **kwargs):
     if tkLogger.isEnabledFor(DEBUG):
-        from .tkCore import reduceStr
-        msg = reduceStr(msg, MSG_MAXLEN)
+        if not inRaw:
+            from .tkCore import reduceStr
+            msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(DEBUG, msg, args, **kwargs)
 
-def info(msg, *args, **kwargs):
+def info(msg, *args, inRaw=False, **kwargs):
     if tkLogger.isEnabledFor(INFO):
-        from .tkCore import reduceStr
-        msg = reduceStr(msg, MSG_MAXLEN)
+        if not inRaw:
+            from .tkCore import reduceStr
+            msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(INFO, msg, args, kwargs)
 
-def warning(msg, *args, **kwargs):
+def warning(msg, *args, inRaw=False, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
-        from .tkCore import reduceStr
-        msg = reduceStr(msg, MSG_MAXLEN)
+        if not inRaw:
+            from .tkCore import reduceStr
+            msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(WARNING, msg, args, **kwargs)
 
-def error(msg, *args, **kwargs):
+def error(msg, *args, inRaw=False, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
-        from .tkCore import reduceStr
-        msg = reduceStr(msg, MSG_MAXLEN)
+        if not inRaw:
+            from .tkCore import reduceStr
+            msg = reduceStr(msg, MSG_MAXLEN)
         tkSound.error()
         tkLogger._log(ERROR, msg, args, **kwargs)
-
 
 class CustomFormatter(logging.Formatter):
     FORMATS = {
