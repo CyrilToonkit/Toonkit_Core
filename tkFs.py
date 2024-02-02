@@ -172,6 +172,7 @@ def cleanPycs(inPath, inRecursive=True, inDryRun=False):
 
     return deletedFiles
 
+@tc.verbosed
 def getModuleFromPath(inPath):
     mod = None
     if inPath.endswith(".py"):
@@ -208,6 +209,7 @@ def getModuleFromPath(inPath):
         sys.path.remove(dirName)
     return mod
 
+@tc.verbosed
 def getFileContents(inPath, readlignes=False):
     content = None
     if os.path.isfile(inPath):

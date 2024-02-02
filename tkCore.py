@@ -53,10 +53,11 @@ else:
 TOOL = None
 PROJECT = None
 OPERATORS = ["==", "!=", ">", "<"]
-
 LINESEP = "\n"
+LOG_INDENT = 2
 
 LAST_STACK = queue.Queue()
+LOG_DEPTH = 0
 
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   ____                           _                 
@@ -72,8 +73,12 @@ def verbosed(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if tkLogger.level() != "DEBUG":
+        if not tkLogger.VERBOSED:
             return func(*args, **kwargs)
+
+        global LOG_DEPTH
+        LOG_DEPTH += 1
+        indent = " " * ((LOG_DEPTH - 1) * LOG_INDENT)
 
         #inspect for arguments
         argspec = inspect.getargspec(func)
@@ -92,6 +97,7 @@ def verbosed(func):
         for key, value in all_kwargs.items():
             argsList.append(("{0}=\"{1}\"" if isinstance(value, basestring) else "{0}={1}").format(key, value)) 
 
+        tkLogger.debug(indent + "< {0}.{1}({2})".format(func.__module__, func.__name__, ",".join(argsList)))
         #Actual function call
         start = time.time()
         try:
@@ -99,13 +105,15 @@ def verbosed(func):
         except Exception as e:
             end = time.time()
             duration = end - start
-            tkLogger.debug("{0}.{1}({2}) took {3:.4f}s and Failed.".format(func.__module__, func.__name__, ",".join(argsList), duration))
+            tkLogger.debug(indent + "> {0}.{1} took {2:.4f}s and Failed.".format(func.__module__, func.__name__, duration))
             raise e
         end = time.time()
         duration = end - start
 
-        tkLogger.debug("{0}.{1}({2}) took {3:.4f}s and returned '{4}'".format(func.__module__, func.__name__, ",".join(argsList), duration, rslt))
-
+        tkLogger.debug(indent + "> {0}.{1} took {2:.4f}s and returned '{3}'".format(func.__module__, func.__name__, duration, rslt))
+        
+        LOG_DEPTH -= 1
+        
         return rslt
 
     return wrapper
@@ -207,6 +215,17 @@ def smartSplit(inScripsPath, inSeparators=STRING_SEPARATORS):
     
     return scripts
 
+def smartJoin(*args, inSep=" "):
+    return inSep.join([str(o) for o in args])
+ 
+def reduceStr(inStr, inMaxLength=500, inCutStr = " ... "):
+    if not isinstance(inStr, basestring):
+        inStr = str(inStr)
+    if len(inStr) <= inMaxLength:
+        return inStr
+    maxLen = inMaxLength - len(inCutStr)
+    return inStr[:int(maxLen/2)] + inCutStr + inStr[-int(maxLen/2):]
+
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
   _____         _   _             
  |_   _|__  ___| |_(_)_ __   __ _ 
@@ -294,6 +313,7 @@ def getProject(dccName="Dcc", inName=None):
         PROJECT =  tkProject.getClass(inName or getTool().options["project"], getTool().options["alternateProjectsPath"].split(","))(inDCC = dcc, inName=inName)
     return PROJECT
 
+@verbosed
 def setProject(dccName="Dcc", inName=None):
     global PROJECT
     if PROJECT and PROJECT.name == inName:
@@ -325,6 +345,7 @@ def setProject(dccName="Dcc", inName=None):
         PROJECT = oldProject
     return PROJECT
 
+@verbosed
 def resetProject():
     global PROJECT
     PROJECT = None
@@ -333,6 +354,7 @@ def resetProject():
 def getProjects():
     return ["demo"]
 
+@verbosed
 def getDcc(dccName):
     dccMod = None
     if sys.version_info >= (2,7):
