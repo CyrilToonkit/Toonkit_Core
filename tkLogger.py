@@ -121,29 +121,33 @@ def removeHandlers():
 def level():
     return "VERBOSE" if VERBOSED else _levelToName.get(tkLogger.level)
 
-def debug(msg, *args, inRaw=False, **kwargs):
+def debug(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(DEBUG):
+        inRaw = kwargs.get("inRaw", False)
         if not inRaw:
             from .tkCore import reduceStr
             msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(DEBUG, msg, args, **kwargs)
 
-def info(msg, *args, inRaw=False, **kwargs):
+def info(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(INFO):
+        inRaw = kwargs.get("inRaw", False)
         if not inRaw:
             from .tkCore import reduceStr
             msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(INFO, msg, args, kwargs)
 
-def warning(msg, *args, inRaw=False, **kwargs):
+def warning(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(WARNING):
+        inRaw = kwargs.get("inRaw", False)
         if not inRaw:
             from .tkCore import reduceStr
             msg = reduceStr(msg, MSG_MAXLEN)
         tkLogger._log(WARNING, msg, args, **kwargs)
 
-def error(msg, *args, inRaw=False, **kwargs):
+def error(msg, *args, **kwargs):
     if tkLogger.isEnabledFor(ERROR):
+        inRaw = kwargs.get("inRaw", False)
         if not inRaw:
             from .tkCore import reduceStr
             msg = reduceStr(msg, MSG_MAXLEN)

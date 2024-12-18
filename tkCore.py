@@ -215,7 +215,11 @@ def smartSplit(inScripsPath, inSeparators=STRING_SEPARATORS):
     
     return scripts
 
-def smartJoin(*args, inSep=" "):
+def smartJoin(*args, **kwargs):
+    """
+    kwargs should contain 'inSep'
+    """
+    inSep = kwargs.get("inSep", " ")
     return inSep.join([str(o) for o in args])
  
 def reduceStr(inStr, inMaxLength=500, inCutStr = " ... "):
