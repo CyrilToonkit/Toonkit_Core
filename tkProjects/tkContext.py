@@ -334,9 +334,9 @@ def translate(inSourcePath, inSourcePattern, inDestinationPattern, inAcceptUndef
 
         if not inVariablesTranslator is None:
             addedVariables = {}
-            for key, value in variables.iteritems():
+            for key, value in variables.items():
                 if key in inVariablesTranslator:
-                    for transKey, transFunc in inVariablesTranslator[key].iteritems():
+                    for transKey, transFunc in inVariablesTranslator[key].items():
                         if transFunc is None:
                             addedVariables[transKey] = value
                         else:
@@ -355,7 +355,7 @@ def translate(inSourcePath, inSourcePattern, inDestinationPattern, inAcceptUndef
             variables2 = variables.copy()
             inDestinationPattern2 = inDestinationPattern
 
-            for variableName, value in inAllowDifferent.iteritems():
+            for variableName, value in inAllowDifferent.items():
                 newValue = value.get("value")
                 newPattern = value.get("pattern")
                 

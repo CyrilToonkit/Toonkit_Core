@@ -147,7 +147,7 @@ class Tool(object):
     #####################################################
 
     def getArguments(self, *args, **kwargs):
-        defaults = [v if not k in kwargs else kwargs[k] for k, v in self.options.iteritems()]
+        defaults = [v if not k in kwargs else kwargs[k] for k, v in self.options.items()]
         for i in range(len(args)):
             if len(defaults) > i:
                 defaults[i] = args[i]

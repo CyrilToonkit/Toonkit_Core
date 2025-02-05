@@ -25,7 +25,7 @@ def getReversedDict(inDict):
 
     reversedDict = {}
 
-    for key, value in inDict.iteritems():
+    for key, value in inDict.items():
         if not value in reversedDict:
             reversedDict[value] = key
 

@@ -107,7 +107,7 @@ def copyTranslated( inSourcePatterns, inDestinationPatterns, inFileList=None, in
 
         matched = True
 
-        for fileType, pattern in inSourcePatterns.iteritems():
+        for fileType, pattern in inSourcePatterns.items():
             variables = {}
 
             if tkcx.match(pattern, srcFile, variables):
